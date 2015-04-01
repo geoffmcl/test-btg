@@ -69,7 +69,7 @@ Essentially test-btg loads the <index>.btg.gz file into memory, and enumerates i
 
 It has an additional option to write some of the contents to an xgraph like file, -x out-file.xg, which can then be viewed in <a target="_blank" href="https://sites.google.com/site/polyview2d/">PolyView2D</a>. A slightly update source of PolyView2D is part of this repo <a target="_blank" href="https://gitlab.com/fgtools/osm2xg">osm2xg</a> ... in effect this produces a 2D rendering of the BTG file... I would love some day to render them in 3D.
 
-Another tool which loads btg files is the Map component of <a target="_blank" href="http://wiki.flightgear.org/Atlas">Atlas/Map</a>, or <a target="_blank" href="http://atlas.sourceforge.net/">About Atlas</a> and writes them out to jpeg or png image files tobe loaded by Atlas. This repo <a target="_blank" href="https://gitlab.com/fgtools/atlas-g">Atlas-g</a> is my updated source of this tool.
+Another tool which loads btg files is the Map component of <a target="_blank" href="http://wiki.flightgear.org/Atlas">Atlas/Map</a>, or <a target="_blank" href="http://atlas.sourceforge.net/">About Atlas</a> and writes them out to jpeg or png image files to be loaded by Atlas. This repo <a target="_blank" href="https://gitlab.com/fgtools/atlas-g">Atlas-g</a> is my updated source of this tool.
 
 Have FUN!
 
