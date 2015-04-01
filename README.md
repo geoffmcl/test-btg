@@ -26,7 +26,7 @@ The primary class is <a target="_blank" href="http://api-docs.freeflightsim.org/
     5. zlib - http://www.zlib.net/
     6. png - http://www.libpng.org/pub/png/pngcode.html
     7. freetype - http://www.freetype.org/download.html
-    8. glut - http://freeglut.sourceforge.net/
+    8. glut (freeglut) - http://freeglut.sourceforge.net/
     9. Plus some optional source, and some I have maybe forgotten!
     
 Building SimGear from source is quite a difficult task. I have a repo which can help with that in windows - https://gitlab.com/fgtools/fg-win - where I have tried to include ALL the above sources. And for unix there is <a target="_blank" href="https://sourceforge.net/p/flightgear/fgmeta/ci/next/tree/download_and_compile.sh">download_and_compile.sh</a>
@@ -52,5 +52,22 @@ After the source has been cloned into a directory -
 Or, of course the cmake GUI can be used, setting the appropriate source diectory, and the bnary directory to the build folder. Click [configure], perhaps several time until all errors are gone, then click [generate] to create the chosen generator files.
 
 Then in windows, if MSVC is the generator, the MSVC IDE can be opened, and the test_btg.sln file loaded. Select the configuration desired, and build.
+
+### Running:
+
+Running test-btg console app with --help, -? will show the brief help. In essence need to give the path to an <index>.btg.gz file. If an <index>.stg file is given, then each object listed in that STG file will be loaded and enumerated.
+
+Also an input directory can be given, with --recurs (-r) to recurse into subdirectory finding all *.btg.gz and *.stg files, and each will be enumerated.
+
+Of course the source of the flightgear scenery files, can be downloaded from <a target="_blank" href="http://www.flightgear.org/download/scenery/">scenery</a>, where they can be downloaded using a <a tareget="_blank" href="http://www.flightgear.org/legacy-Downloads/scenery-v2.12.html">grpahical interface</a>, from mirror sites, using BitTorrent, or purchased on a DVD.
+
+Additionally a small sample of the scenery is included in the flightgear base data, <a target="_blank" href="https://sourceforge.net/p/flightgear/fgdata/ci/next/tree/">FGData</a>, or by using terrasync, when running the fgfs simulator.
+
+Essentially test-btg loads the <index>.btg.gz file into memeory, and enumerates its contents, giving more information if the 'verbosity', -v2, -v5, -v9, is increased.
+
+It has an additional option to write some of the contents to an xgraph like file, -x out-file.xg, which can then be viewed in <a target="_blank" href="https://sites.google.com/site/polyview2d/">PolyView2D</a>. A slightly update source of PolyView2D is part of this repo <a target="_blank" href="https://gitlab.com/fgtools/osm2xg">osm2xg</a> ... in effect this produces a 2D rendering of the BTG file... I would love some day to render them in 3D.
+
+Have FUN!
+
 
 ; eof
