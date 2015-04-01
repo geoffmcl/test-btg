@@ -19,7 +19,7 @@ The primary class is <a target="_blank" href="http://api-docs.freeflightsim.org/
  2. cmake - http://www.cmake.org/download/
  3. build tools, like <a target="_blank" href="https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx">MSVC</a> in Windows, make/gcc in unix, etc
  4. simgear - http://simgear.sourceforge.net/downloads.html - which has its own dependencies
-    1. OpenSceneGraph - http://www.openscenegraph.org/ - v 3.2 or later, whihc also has many depenencies
+    1. OpenSceneGraph - http://www.openscenegraph.org/ - v 3.2 or later, which also has many dependencies
     2. plib - http://plib.sourceforge.net/ - v 1.8.5 or later
     3. boost - http://www.boost.org/ - v 1.37 or newer
     4. OpenAL - http://kcat.strangesoft.net/openal.html
