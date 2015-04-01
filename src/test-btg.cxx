@@ -34,7 +34,7 @@ static vSTGS vInputs;
 
 void give_help( char *name )
 {
-    printf("%s: usage: [options] usr_input\n", module);
+    printf("%s: usage: [options] usr_input(s)\n", module);
     printf("Options:\n");
     printf(" --help  (-h or -?) = This help and exit(2)\n");
     printf(" --verb[n]     (-v) = Bump or set verbosity. (def=%d)\n", verbosity);
@@ -42,6 +42,9 @@ void give_help( char *name )
         recursive ? "On" : "Off");
     printf(" --xg <file>   (-x) = Output xg string to the file. (def=%s)\n",
         (xg_file && (options & opt_add_xg_text)) ? "On" : "Off" );
+    printf("\n");
+    printf(" In essence, given either a btg.gz file list, or a stg file, or even a\n");
+    printf(" directory, load and enumerate the contents of the btg.gz files found.\n");
     // TODO: More help
 }
 
