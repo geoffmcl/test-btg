@@ -49,7 +49,9 @@ After the source has been cloned into a directory -
  2. cmake ..
  3. cmake --build . --config Release
  
-Or, of course the cmake GUI can be used, setting the appropriate source diectory, and the bnary directory to the build folder. Click [configure], perhaps several time until all errors are gone, then click [generate] to create the chosen generator files.
+Naturally, the 2nd step will FAIL is simgear, and othre prereqisite libraries are not found.
+ 
+Or, of course the cmake GUI can be used, setting the appropriate source diectory, and the bnary directory to the build folder. Click [configure], perhaps several times until all errors are gone, then click [generate] to create the chosen generator files.
 
 Then in windows, if MSVC is the generator, the MSVC IDE can be opened, and the test_btg.sln file loaded. Select the configuration desired, and build.
 
@@ -61,13 +63,14 @@ Also an input directory can be given, with --recurs (-r) to recurse into subdire
 
 Of course the source of the flightgear scenery files, can be downloaded from <a target="_blank" href="http://www.flightgear.org/download/scenery/">scenery</a>, where they can be downloaded using a <a tareget="_blank" href="http://www.flightgear.org/legacy-Downloads/scenery-v2.12.html">grpahical interface</a>, from mirror sites, using BitTorrent, or purchased on a DVD.
 
-Additionally a small sample of the scenery is included in the flightgear base data, <a target="_blank" href="https://sourceforge.net/p/flightgear/fgdata/ci/next/tree/">FGData</a>, or by using terrasync, when running the fgfs simulator.
+Additionally a small sample of the scenery is included in the flightgear base data, <a target="_blank" href="https://sourceforge.net/p/flightgear/fgdata/ci/next/tree/">FGData</a>, or by using terrasync, when running the fgfs simulator. The full source of the scenery files is <a target="_blank" href="https://code.google.com/p/terrascenery/source/checkout">here</a>.
 
-Essentially test-btg loads the <index>.btg.gz file into memeory, and enumerates its contents, giving more information if the 'verbosity', -v2, -v5, -v9, is increased.
+Essentially test-btg loads the <index>.btg.gz file into memory, and enumerates its contents, giving more information if the 'verbosity', -v2, -v5, -v9, is increased.
 
 It has an additional option to write some of the contents to an xgraph like file, -x out-file.xg, which can then be viewed in <a target="_blank" href="https://sites.google.com/site/polyview2d/">PolyView2D</a>. A slightly update source of PolyView2D is part of this repo <a target="_blank" href="https://gitlab.com/fgtools/osm2xg">osm2xg</a> ... in effect this produces a 2D rendering of the BTG file... I would love some day to render them in 3D.
 
-Have FUN!
+Another tool which loads btg files is the Map component of <a target="_blank" href="http://wiki.flightgear.org/Atlas">Atlas/Map</a>, or <a target="_blank" href="http://atlas.sourceforge.net/">About Atlas</a> and writes them out to jpeg or png image files tobe loaded by Atlas. This repo <a target="_blank" href="https://gitlab.com/fgtools/atlas-g">Atlas-g</a> is my updated source of this tool.
 
+Have FUN!
 
 ; eof
