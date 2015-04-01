@@ -1,0 +1,4 @@
+bldlog-1.txt
+libutils.a
+test-btg
+
