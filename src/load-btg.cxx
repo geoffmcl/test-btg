@@ -60,7 +60,7 @@ int load_btg::load( SGPath file, PMOPTS po )
             return btg_repeat;
         po->done.push_back(fn);
     }
-    if (is_file_or_directory(file.c_str()) !=  DT_FILE) {
+    if (is_file_or_directory(file.c_str()) !=  MDT_FILE) {
         SPRTF("\n%s: Unable to 'stat' file '%s'\n", module, file.c_str());
         return btg_nostat;
     }

@@ -26,15 +26,15 @@ static struct stat buf;
 DiskType is_file_or_directory32 ( const char * path )
 {
     if (!path)
-        return DT_NONE;
+        return MDT_NONE;
 	if (stat(path,&buf) == 0)
 	{
 		if (buf.st_mode & M_IS_DIR)
-			return DT_DIR;
+			return MDT_DIR;
 		else
-			return DT_FILE;
+			return MDT_FILE;
 	}
-	return DT_NONE;
+	return MDT_NONE;
 }
 
 size_t get_last_file_size32() { return buf.st_size; }
@@ -47,11 +47,11 @@ DiskType is_file_or_directory64 ( const char * path )
 	if (_stat64(path,&buf64) == 0)
 	{
 		if (buf64.st_mode & M_IS_DIR)
-			return DT_DIR;
+			return MDT_DIR;
 		else
-			return DT_FILE;
+			return MDT_FILE;
 	}
-	return DT_NONE;
+	return MDT_NONE;
 }
 
 __int64 get_last_file_size64() { return buf64.st_size; }

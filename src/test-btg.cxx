@@ -102,10 +102,10 @@ void expand_dir( const char *dir )
                 SGPath file(dir);
                 file.append(de->d_name);
                 DiskType dt = is_file_or_directory(file.c_str());
-                if (dt == DT_DIR) {
+                if (dt == MDT_DIR) {
                     dirs.push_back(file.c_str());
                     tot_dirs++;
-                } else if (dt == DT_FILE) {
+                } else if (dt == MDT_FILE) {
                     tot_files++;
                     res = is_btg_or_stg_file(file.c_str());
                     if (res) {
@@ -207,9 +207,9 @@ int parse_args( int argc, char **argv )
             std::string fp = sgp.realpath();
             usr_input = strdup(fp.c_str());
             DiskType dt = is_file_or_directory(usr_input);
-            if (dt == DT_DIR) {
+            if (dt == MDT_DIR) {
                 expand_dir(usr_input);
-            } else if (dt == DT_FILE) {
+            } else if (dt == MDT_FILE) {
                 if (!string_in_vec( vInputs, usr_input )) {
                     vInputs.push_back(usr_input);
                 }
@@ -220,10 +220,10 @@ int parse_args( int argc, char **argv )
         }
     }
     if (debug_on && !usr_input) {
-        if (is_file_or_directory(def_input) == DT_FILE) {
+        if (is_file_or_directory(def_input) == MDT_FILE) {
             vInputs.push_back(def_input);
         }
-        if (is_file_or_directory(def_input2) == DT_FILE) {
+        if (is_file_or_directory(def_input2) == MDT_FILE) {
             vInputs.push_back(def_input2);
         }
 

@@ -15,7 +15,7 @@ static const char *module = "sprtfstr";
 
 #define CHKBUF(a,b) { \
     if (!a) {       \
-        fprintf(stderr,"Memroy FAILED on %ld byte\n!", b); \
+        fprintf(stderr,"Memory FAILED on %ld byte\n!", b); \
         exit(1); \
     } \
 }
@@ -87,7 +87,7 @@ const char *sprtfstr::_appendf(const char *fmt, va_list ap)
 	    // This just finds the next multiple of _increment greater
 	    // than the size we need.  Perhaps nicer would be to find the
 	    // next power of 2?
-    	_size = (_strlen + newLen + 1 + _increment) / _increment * _increment;
+    	_size = (_strlen + newLen + 1 + _increments) / _increments * _increments;
 	    _buf = (char *)realloc(_buf, _size);
         CHKBUF(_buf,_size);
 	    vsnprintf(_buf + _strlen, _size - _strlen, fmt, ap_copy);
@@ -100,3 +100,4 @@ const char *sprtfstr::_appendf(const char *fmt, va_list ap)
 
 
 // eof = sprtfstr.cxx
+

@@ -54,6 +54,7 @@ if(WIN32 AND MSVC)
     list(APPEND add_LIBS ws2_32 Winmm)
 else()
     # items for unix
+    set(WARNING_FLAGS "${WARNING_FLAGS} -Wno-unused-variable")
 endif()
 
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} ${MSVC_FLAGS} -D_REENTRANT" )
@@ -83,6 +84,9 @@ include_directories( ${ZLIB_INCLUDE_DIRS} )
 #   Boost_INCLUDE_DIRS     - Boost include directories
 find_package(Boost   REQUIRED)
 include_directories( ${Boost_INCLUDE_DIRS} )
+if (UNIX)
+    list(APPEND add_LIBS ${CMAKE_THREAD_LIBS_INIT})
+endif ()
 
 #####################################################################
 ## configuration
@@ -116,9 +120,13 @@ set(${name}_HDRS
     ${dir}/utils.hxx
     ${dir}/sprtfstr.hxx
     )
-if (NOT HAVE_DIRENT_H)
-    list(APPEND ${name}_SRCS ${dir}/dirent.c)
-    list(APPEND ${name}_HDRS ${dir}/dirent.h)
+if (HAVE_DIRENT_H)
+    message(STATUS "Found system dirent.h - excluding local source")
+else ()
+    message(STATUS "dirent.h NOT found - using local source")
+    include_directories( src/dirent )
+    list(APPEND ${name}_SRCS src/dirent/dirent.c)
+    list(APPEND ${name}_HDRS src/dirent/dirent.h)
 endif ()    
 add_library( ${name} ${${name}_SRCS} ${${name}_HDRS} )
 list(APPEND add_LIBS ${name})
