@@ -143,11 +143,13 @@ set(${name}_SRCS
     ${dir}/test-btg.cxx
     ${dir}/load-btg.cxx
     ${dir}/load-stg.cxx
+    ${dir}/palette.cxx
     )
 set(${name}_HDRS
     ${dir}/test-btg.hxx
     ${dir}/load-btg.hxx
     ${dir}/load-stg.hxx
+    ${dir}/palette.hxx
     )
 add_executable( ${name} ${${name}_SRCS} ${${name}_HDRS} )
 if (add_LIBS)

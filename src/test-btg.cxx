@@ -17,6 +17,7 @@
 #include "load-stg.hxx"
 #include "load-btg.hxx"
 #include "test-btg.hxx"
+#include "palette.hxx"
 #include "sprtf.hxx"
 
 static const char *module = "test-btg";
@@ -276,6 +277,22 @@ void do_log_file(char *name)
     set_log_file(cp,false);
 }
 
+#if 0 // 000000000000000000000000000000000000000000
+void test_pal()
+{
+    const char *mat = "Freeway";
+    std::string s = get_mat_color(mat);
+    printf("Mat %s color %s\n", mat, s.c_str());
+    mat = "Stream";
+    s = get_mat_color(mat);
+    printf("Mat %s color %s\n", mat, s.c_str());
+    mat = "Grass";
+    s = get_mat_color(mat);
+    printf("Mat %s color %s\n", mat, s.c_str());
+    exit(1);
+}
+#endif // 000000000000000000000000000000000000000
+
 // for ZLIB DLL load - now using static library if found
 // PATH=X:\3rdParty.x64\bin;%PATH%
 // samples: X:/fgdata/Scenery/Terrain/w130n30/w122n37/KSCK.btg.gz - points and tris
@@ -286,6 +303,7 @@ int main( int argc, char **argv )
     size_t ii, max;
     int ret, iret = 0;
     do_log_file(argv[0]);
+    // test_pal();
     iret = parse_args(argc,argv);
     if (iret)
         return iret;
@@ -340,6 +358,10 @@ int main( int argc, char **argv )
     delete pls;
     delete plb;
     delete pmo;
+    if (VERB5(verbosity)) {
+        outout_mat_color_counts();
+    }
+
     return iret;
 }
 

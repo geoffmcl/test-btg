@@ -10,6 +10,7 @@
 #include "sprtf.hxx"
 #include "sprtfstr.hxx"
 #include "utils.hxx"
+#include "palette.hxx"
 #include "load-btg.hxx"
 
 #ifndef SPRTF
@@ -39,7 +40,7 @@ load_btg::~load_btg()
 
 int load_btg::load( SGPath file, PMOPTS po )
 {
-    size_t v, n, k, i, j, kn;
+    size_t v, n, k, i, j, kn, m;
     size_t ui;
     double lat,lon,elev;
     SGVec3d gbs_p, nd, node;
@@ -50,15 +51,16 @@ int load_btg::load( SGPath file, PMOPTS po )
     sprtfstr stg;
     const char *cp;
     bool collect_xg = false;
+    std::string s;
     if (po) {
         verb = po->verb;
         options = po->options;
         collect_xg = (options & opt_add_xg_text) ? true : false;
         po->xg = "";
-        std::string fn = file.file();
-        if (string_in_vec(po->done,fn.c_str())) 
+        s = file.file();
+        if (string_in_vec(po->done,s.c_str())) 
             return btg_repeat;
-        po->done.push_back(fn);
+        po->done.push_back(s);
     }
     if (is_file_or_directory(file.c_str()) !=  MDT_FILE) {
         SPRTF("\n%s: Unable to 'stat' file '%s'\n", module, file.c_str());
@@ -157,14 +159,34 @@ int load_btg::load( SGPath file, PMOPTS po )
 
     v = _chunk.get_tris_v().size();
     n = _chunk.get_tris_n().size();
-    if (v || VERB5(verb)) {
-        SPRTF("%s: tris v %u, n %u %s\n", module, (int)v, (int)n,
-            ((v == n) ? "" : "***CHECK ME!***"));
-        if (v && collect_xg)
-            po->xg += "color = yellow\n";
+    const string_list& tri_mats = _chunk.get_tri_materials();
+    m = tri_mats.size();
+    vSTGS mats;
+    if (v || n || m || VERB5(verb)) {
+        SPRTF("%s: tris v %u, n %u mats %u %s\n", module, (int)v, (int)n, (int)m,
+            ((v == n) ? "" : "***CHECK ME!***"),
+            ((v == m) ? "" : "***CHECK MATS!***"));
+        if (v && collect_xg) {
+            if (!m) {
+                po->xg += "color = yellow\n";
+            }
+        }
         for (i = 0; i < v; i++) {
             int_list il = _chunk.get_tris_v().at(i);
-            k = il.size();
+            s = "";
+            if (i < m) {
+                s = tri_mats[i];
+                if (!string_in_vec(mats,s.c_str())) {
+                    if (!is_mat_in_list(s.c_str()))
+                        mats.push_back("MISSING");
+                    mats.push_back(s);
+                }
+                s = get_mat_color(s.c_str());
+                po->xg += "color = ";
+                po->xg += s;
+                po->xg += "\n";
+            }
+            k = il.size();  // this should ALWAYS be 3, but
             for (j = 0; j < k; j++) {
                 ui = il.at(j);
                 if (ui < kn) {
@@ -174,7 +196,7 @@ int load_btg::load( SGPath file, PMOPTS po )
                     lat = geod.getLatitudeDeg();
                     lon = geod.getLongitudeDeg();
                     elev = geod.getElevationM();
-                    cp = stg.printf("%lf %lf ; %lf\n", lon, lat, elev );
+                    cp = stg.printf("%lf %lf ; %lf %s\n", lon, lat, elev, s.c_str() );
                     if (VERB9(verb)) {
                         SPRTF("%s",cp);
                     }
@@ -194,7 +216,15 @@ int load_btg::load( SGPath file, PMOPTS po )
             }
         }
     }
-
+    i = mats.size();
+    if (m && i && VERB2(verb)) {
+        cp = stg.printf("%s: mats %u ", module, (int)i);
+        for (m = 0; m < i; m++) {
+            s = mats[m];
+            cp = stg.appendf("%s ", s.c_str());
+        }
+        SPRTF("%s\n",cp);
+    }
     v = _chunk.get_strips_v().size();
     n =_chunk.get_strips_n().size();
     if (v || VERB5(verb)) {
