@@ -43,7 +43,7 @@ static struct _stat64 buf64;
 DiskType is_file_or_directory64 ( const char * path )
 {
     if (!path)
-        return DT_NONE;
+        return MDT_NONE;
 	if (_stat64(path,&buf64) == 0)
 	{
 		if (buf64.st_mode & M_IS_DIR)
