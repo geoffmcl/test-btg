@@ -8,6 +8,9 @@
 
 #include <stdio.h>
 #include <string>
+#ifndef _MSC_VER
+#include <string.h> // for strcmp, ...
+#endif
 #include "sprtf.hxx"
 #include "palette.hxx"
 
