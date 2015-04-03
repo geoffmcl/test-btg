@@ -3,6 +3,7 @@
 BN=`basename $0`
 TMPPRJ="test-btg"
 TMPLOG="bldlog-1.txt"
+TMPINST="$HOME"
 
 if [ -f "$TMPLOG" ]; then
     rm -f -v $TMPLOG
@@ -11,6 +12,8 @@ fi
 echo "$BN: Build of $TMPPRJ" > $TMPLOG
 
 CMOPTS="-DCMAKE_PREFIX_PATH=/media/Disk2/FG/fg21/install/simgear"
+CMOPTS="$CMOPTS -DCMAKE_INSTALL_PREFIX=$TMPINST"
+
 export OSG_DIR=/media/Disk2/FG/fg21/install/OSGtrunk
 echo "$BN: exported OSG_DIR=$OSG_DIR"
 echo "$BN: exported OSG_DIR=$OSG_DIR" >> $TMPLOG
@@ -40,6 +43,8 @@ if [ ! "$?" = "0" ]; then
 fi
 
 echo "$BN: Appears a successful build of $TMPPRJ"
-
+echo ""
+echo "$BN: Time for 'make install' to install to $TMPINST/bin, if desired..."
+echo ""
 # eof
 
