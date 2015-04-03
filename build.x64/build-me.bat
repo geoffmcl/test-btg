@@ -108,7 +108,8 @@
 @echo.
 @echo Appears a successful build
 @echo.
-@echo No install at this time of this test application
+@echo No Windows install at this time of this test application
+@echo Perhaps with modification updexe.bat can be used to copy to a runtime location...
 @echo.
 @goto END
 @echo Note install location %TMPINST%
