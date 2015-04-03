@@ -5,4 +5,5 @@ bldlog-1.txt
 cmake_install.cmake
 libutils.a
 test-btg
+install_manifest.txt
 
