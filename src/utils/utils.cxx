@@ -371,6 +371,24 @@ char *get_mbbox_stg( PMBBOX pbb )
     return cp;
 }
 
+char *get_mbbox_xg_stg( PMBBOX pbb )
+{
+    MBBOX bb = *pbb;
+    if (valid_mbbox( bb ) &&
+        bbox_in_world_range(pbb) ) 
+    {
+        char *cp = GetNxtBuf();
+        *cp = 0;
+        sprintf(EndBuf(cp),"%lf %lf ; %lf\n", pbb->min_lon, pbb->min_lat, pbb->max_alt);
+        sprintf(EndBuf(cp),"%lf %lf ; %lf\n", pbb->min_lon, pbb->max_lat, (pbb->max_alt+pbb->min_alt)/2.0);
+        sprintf(EndBuf(cp),"%lf %lf ; %lf\n", pbb->max_lon, pbb->max_lat, pbb->min_alt);
+        sprintf(EndBuf(cp),"%lf %lf ; %lf\n", pbb->max_lon, pbb->min_lat, (pbb->max_alt+pbb->min_alt)/2.0);
+        sprintf(EndBuf(cp),"%lf %lf ; %lf\n", pbb->min_lon, pbb->min_lat, pbb->max_alt);
+        return cp;
+    }
+    return 0;
+}
+
 bool string_in_vec( vSTGS &vs, const char *file )
 {
     std::string s;

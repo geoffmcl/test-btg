@@ -10,6 +10,8 @@
 #include <string.h> // for strdup(), ...
 #include <simgear/misc/sg_path.hxx> // SGPath
 #include <simgear/io/sg_binobj.hxx> // SGBinObject
+#include <iostream>
+#include <fstream>
 #ifdef WIN32
 #include <Windows.h>
 #endif
@@ -30,23 +32,56 @@ static int verbosity = 0;
 static const char *def_input = "X:\\fgdata\\Scenery\\Terrain\\w130n30\\w123n37\\942026.stg";
 static const char *def_input2 = "X:\\fgdata\\Scenery\\Terrain\\w130n30\\w123n37\\KSFO.btg.gz";
 static bool recursive = false;
+static bool add_tri_bbox = false;
 
 static vSTGS vInputs;
 
 void give_help( char *name )
 {
-    printf("%s: usage: [options] usr_input(s)\n", module);
-    printf("Options:\n");
-    printf(" --help  (-h or -?) = This help and exit(2)\n");
-    printf(" --verb[n]     (-v) = Bump or set verbosity. (def=%d)\n", verbosity);
-    printf(" --recurs      (-r) = Recursivly process sub-directories. (def=%s)\n",
+    SPRTF("\n%s: usage: [options] usr_input(s)\n", module);
+    SPRTF("Options:\n");
+    SPRTF(" --help  (-h or -?) = This help and exit(2)\n");
+    SPRTF(" --verb[n]     (-v) = Bump or set verbosity. (def=%d)\n", verbosity);
+    SPRTF(" --in <file>   (-i) = Input files list to process.\n");
+    SPRTF(" --recurs      (-r) = Recursivly process sub-directories. (def=%s)\n",
         recursive ? "On" : "Off");
-    printf(" --xg <file>   (-x) = Output xg string to the file. (def=%s)\n",
+    SPRTF(" --xg <file>   (-x) = Output xg string to the file. (def=%s)\n",
         (xg_file && (options & opt_add_xg_text)) ? "On" : "Off" );
-    printf("\n");
-    printf(" In essence, given either a btg.gz file list, or a stg file, or even a\n");
-    printf(" directory, load and enumerate the contents of the btg.gz files found.\n");
+    SPRTF(" --bbox        (-b) = Add lights and triangle bbox to above xg file.\n");
+    SPRTF("\n");
+    SPRTF(" --out <html>  (-o) = Output palette html file, and exit. Only for debug.\n");
+    SPRTF("\n");
+    SPRTF(" In essence, given either a btg.gz file list, or a stg file, or even a\n");
+    SPRTF(" directory, load and enumerate the contents of the btg.gz files found.\n\n");
     // TODO: More help
+}
+
+///////////////////////////////////////////////////////////
+// This is really ONLY FOR DEBUG
+/////////////////////////////////////////////////////////
+void out_pal_html(const char *pal_file)
+{
+#if 0 // 0000000000000000000000000000000000000000
+    const char *mat = "Freeway";
+    std::string s = get_mat_color(mat);
+    SPRTF("Mat %s color %s\n", mat, s.c_str());
+    mat = "Stream";
+    s = get_mat_color(mat);
+    SPRTF("Mat %s color %s\n", mat, s.c_str());
+    mat = "Grass";
+    s = get_mat_color(mat);
+    SPRTF("Mat %s color %s\n", mat, s.c_str());
+#endif // 000000000000000000000000000000000000000
+    std::string html = get_palette_html();
+    FILE *fp = fopen(pal_file,"w");
+    if (fp) {
+        size_t res = fwrite(html.c_str(),1,html.size(),fp);
+        fclose(fp);
+        SPRTF("%s: Palette written to '%s'.\n", module, pal_file);
+    } else {
+        fwrite(html.c_str(),1,html.size(),stdout);
+        SPRTF("%s: Failed to create '%s' file!\n", module, pal_file);
+    }
 }
 
 #ifndef ISDIGIT
@@ -83,8 +118,6 @@ bool is_btg_file(const char *file)
     }
     return false;
 }
-
-
 
 void expand_dir( const char *dir )
 {
@@ -146,6 +179,59 @@ void expand_dir( const char *dir )
     }
 }
 
+int add_input(char *arg)
+{
+    SGPath sgp(arg);
+    std::string fp = sgp.realpath();
+    if (usr_input)
+        free((void *)usr_input);
+    usr_input = strdup(fp.c_str());
+    DiskType dt = is_file_or_directory(usr_input);
+    if (dt == MDT_DIR) {
+        expand_dir(usr_input);
+    } else if (dt == MDT_FILE) {
+        if (!string_in_vec( vInputs, usr_input )) {
+            vInputs.push_back(usr_input);
+        }
+    } else {
+        SPRTF("%s: Unable to 'stat' file (or dir) '%s'! Aborting...\n", module, usr_input);
+        return 1;
+    }
+    return 0;
+}
+
+int process_input_file( char *file )
+{
+    std::ifstream input(file);
+    if (input.fail()) {
+        SPRTF("%s: Unable to open input file '%s'!\n", module, file );
+        return 1;
+    }
+    //std::string line;
+    char buf[264];
+    size_t len;
+    // while( std::getline( input, line ) ) {
+    // while (input.getline(line))
+    while (input.getline(buf,256)) {
+        len = strlen(buf);
+        while (len) {
+            len--;
+            if (buf[len] > ' ')
+                break;
+            buf[len] = 0;
+        }
+        if (len) {
+            //if (add_input((char *)line.c_str())) {
+            if (add_input(buf)) {
+                input.close();
+                return 1;
+            }
+        }
+    }
+    input.close();
+    return 0;
+}
+
 int parse_args( int argc, char **argv )
 {
     int i,i2,c;
@@ -196,6 +282,32 @@ int parse_args( int argc, char **argv )
                         arg );
                 }
                 break;
+            case 'b':
+                add_tri_bbox = true;
+                break;
+            case 'o':
+                // mainly for debug
+                if (i2 < argc) {
+                    i++;
+                    sarg = argv[i];
+                    out_pal_html(sarg);
+                    return 1;
+                } else {
+                    SPRTF("%s: Error: Expected file name to follow %s! Aborting...", module,  arg );
+                    return 1;
+                }
+                break;
+            case 'i':
+                if (i2 < argc) {
+                    i++;
+                    sarg = argv[i];
+                    if (process_input_file(sarg))
+                        return 1;
+                } else {
+                    SPRTF("%s: Error: Expected file name to follow %s! Aborting...", module,  arg );
+                    return 1;
+                }
+                break;
             // TODO: Other arguments
             default:
                 SPRTF("%s: Unknown argument '%s'. Tyr -? for help...\n", module, arg);
@@ -203,24 +315,8 @@ int parse_args( int argc, char **argv )
             }
         } else {
             // bear argument
-            //if (usr_input) {
-            //    printf("%s: Already have input '%s'! What is this '%s'?\n", module, usr_input, arg );
-            //    return 1;
-            //}
-            SGPath sgp(arg);
-            std::string fp = sgp.realpath();
-            usr_input = strdup(fp.c_str());
-            DiskType dt = is_file_or_directory(usr_input);
-            if (dt == MDT_DIR) {
-                expand_dir(usr_input);
-            } else if (dt == MDT_FILE) {
-                if (!string_in_vec( vInputs, usr_input )) {
-                    vInputs.push_back(usr_input);
-                }
-            } else {
-                SPRTF("%s: Unable to 'stat' file (or dir) '%s'! Aborting...\n", module, usr_input);
+            if (add_input(arg))
                 return 1;
-            }
         }
     }
     if (debug_on && !usr_input) {
@@ -273,37 +369,22 @@ void do_log_file(char *name)
     }
 #endif
     strcat(cp,def_log);
-    // printf("Setting log file to '%s'\n",cp);
+    // SPRTF("Setting log file to '%s'\n",cp);
     set_log_file(cp,false);
 }
-
-#if 0 // 000000000000000000000000000000000000000000
-void test_pal()
-{
-    const char *mat = "Freeway";
-    std::string s = get_mat_color(mat);
-    printf("Mat %s color %s\n", mat, s.c_str());
-    mat = "Stream";
-    s = get_mat_color(mat);
-    printf("Mat %s color %s\n", mat, s.c_str());
-    mat = "Grass";
-    s = get_mat_color(mat);
-    printf("Mat %s color %s\n", mat, s.c_str());
-    exit(1);
-}
-#endif // 000000000000000000000000000000000000000
 
 // for ZLIB DLL load - now using static library if found
 // PATH=X:\3rdParty.x64\bin;%PATH%
 // samples: X:/fgdata/Scenery/Terrain/w130n30/w122n37/KSCK.btg.gz - points and tris
 // main() OS entry
 static MBBOX bb;
+static MBBOX tri_bb;
+static vSTGS mats;
 int main( int argc, char **argv )
 {
     size_t ii, max;
     int ret, iret = 0;
     do_log_file(argv[0]);
-    // test_pal();
     iret = parse_args(argc,argv);
     if (iret)
         return iret;
@@ -315,6 +396,7 @@ int main( int argc, char **argv )
     pmo->verb = verbosity;
     std::string xg;
     init_mbbox(bb);
+    init_mbbox(tri_bb);
     max = vInputs.size();
     double bgn = get_seconds();
     for (ii = 0; ii < max; ii++) {
@@ -326,12 +408,16 @@ int main( int argc, char **argv )
             iret |= ret;
             if (ret == 0) {
                 merge_mbbox(bb,plb->bb);
+                merge_mbbox(tri_bb,plb->tri_bb);
+                plb->add_mats(mats);
             }
         } else {
             ret = pls->load(file, pmo); // assume a STG file
             iret |= ret;
             if (ret == 0) {
                 merge_mbbox(bb,pls->bb);
+                merge_mbbox(tri_bb,pls->tri_bb);
+                pls->add_mats(mats);
             }
         }
         xg += pmo->xg;
@@ -340,14 +426,35 @@ int main( int argc, char **argv )
     SPRTF("%s: Done %u of %u inputs, BBox %s, in %s secs\n", module, (int)ii, (int)max,
         get_mbbox_stg(&bb),
         get_elapsed_stg(bgn));
+    if (VERB2(verbosity)) {
+        max = mats.size();
+        if (max) {
+            SPRTF("%s: Saw %d mats ", module, (int)max);
+            for (ii = 0; ii < max; ii++) {
+                SPRTF("%s ", mats[ii].c_str());
+            }
+            SPRTF("\n");
+        }
+    }
+    ///////////////////////////////////////////////////////////////////////////
     if (xg_file && (options & opt_add_xg_text) && xg.size()) {
         FILE *fp = fopen(xg_file,"w");
         if (fp) {
-            size_t res = fwrite( xg.c_str(), xg.size(), 1, fp );
+            size_t res = 1;
+            if (add_tri_bbox) {
+                char *cp = get_mbbox_xg_stg( &tri_bb );
+                if (cp) {
+                    std::string msg("color = green\n");
+                    msg += cp;
+                    msg += "NEXT\n";
+                    res = fwrite( msg.c_str(), msg.size(), 1, fp );
+                }
+            }
+            if (res == 1)
+                res = fwrite( xg.c_str(), xg.size(), 1, fp );
             fclose(fp);
             if (res != 1) {
-                SPRTF("%s: Failed to write xg to '%s'!\n", module,
-                    xg_file );
+                SPRTF("%s: Failed to write xg to '%s'!\n", module, xg_file );
             } else {
                 SPRTF("%s: Written xg file '%s'\n", module, xg_file);
             }
@@ -361,7 +468,7 @@ int main( int argc, char **argv )
     if (VERB5(verbosity)) {
         outout_mat_color_counts();
     }
-
+    close_palette();
     return iret;
 }
 

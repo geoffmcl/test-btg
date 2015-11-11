@@ -26,6 +26,10 @@ public:
 
     int load( SGPath file, PMOPTS po );
     MBBOX bb;
+    MBBOX tri_bb;
+    vSTGS mats;
+    int add_mats( vSTGS &m );
+
 };
 
 

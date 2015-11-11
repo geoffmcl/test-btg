@@ -91,7 +91,7 @@ typedef struct tagMBBOX {
 
 
 extern char *get_mbbox_stg( PMBBOX pbb );
-
+extern char *get_mbbox_xg_stg( PMBBOX pbb );
 
 #define VERB1(a) (a >= 1)
 #define VERB2(a) (a >= 2)

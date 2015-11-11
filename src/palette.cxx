@@ -12,6 +12,7 @@
 #include <string.h> // for strcmp, ...
 #endif
 #include "sprtf.hxx"
+#include "utils.hxx"
 #include "palette.hxx"
 
 static const char *module = "palette";
@@ -29,7 +30,7 @@ typedef struct tagPALMAP {
 //# Physical feature colours
 PALMAP sPalMap[] = {
     //# Water
-    { "water", 0.671, 0.737, 0.745, 1.0, 0, 0 },
+    { "water", 0.2, 0.2, 0.745, 1.0, 0, 0 },
     // # Cities
     { "city", 1.000, 0.973, 0.459, 1.0, 0 , 0 },
     // # Transportation
@@ -47,6 +48,8 @@ PALMAP sPalMap[] = {
     { "cyan",		0.0,   1.0,   1.0,	1.0, 0 , 0 },
     { "magenta",	1.0,   0.0,   1.0,	1.0, 0 , 0 },
     { "yellow",		1.0,   1.0,   0.0,  1.0, 0 , 0 },
+    { "black",      0.0,   0.0,   0.0,  0.0, 0 , 0 },
+
     // END OF TABLE
     { 0,            0, 0, 0, 0, 0 }
 };
@@ -226,6 +229,7 @@ MATMAP sMatMap[] = {
     { "Rock",			 "brown",    48, 0 }, // other	# Rock
     { "Lava",            "brown",    49, 0 }, // other	# Lava-covered area
     { "OpenMining",      "brown",    50, 0 }, // other	# OpenMining
+    { "Gravel",          "brown",   178, 0 },
     // # USGS Land Covers
     // # These are low-priority, since known polygons should always win.
     // ========
@@ -279,11 +283,100 @@ MATMAP sMatMap[] = {
     { "pa_tiedown",      "taxiway", 101, 0 },
     { "pc_taxiway",      "taxiway", 102, 0 },
     { "pc_tiedown",      "taxiway", 103, 0 },
-
-
+    { "pa_threshold",    "runway",  104, 0 },
+    { "pa_1l",           "runway",  105, 0 },
+    { "pa_2r",           "runway",  106, 0 },
+    { "pa_centerline",   "white",   107, 0 },
+    { "pa_aim",          "runway",  108, 0 },
+    { "pa_rest",         "runway",  109, 0 },
+    { "pa_3l",           "runway",  110, 0 },
+    { "pa_0r",           "runway",  111, 0 },
+    { "pa_shoulder_f",   "runway",  112, 0 },
+    { "lf_runway_hold",  "runway",  113, 0 },
+    { "lf_dbl_solid_yellow","yellow",114,0 },
+    { "dirt_rwy",        "brown",   115, 0 },
+    { "pc_heli",         "yellow",  116, 0 },
+    { "pc_threshold",    "runway",  117, 0 },
+    { "grass_rwy",       "green",   118, 0 },
+    { "pa_0l",           "runway",  119, 0 },
+    { "pa_7r",           "runway",  120, 0 },
+    { "pa_2l",           "runway",  121, 0 },
+    { "pa_5r",           "runway",  122, 0 },
+    { "pc_shoulder_f",   "runway",  123, 0 },
+    { "pa_heli",         "yellow",  124, 0 },
+    { "pc_1l",           "runway",  125, 0 },
+    { "pc_0r",           "runway",  126, 0 },
+    { "pc_centerline",   "runway",  127, 0 },
+    { "pc_aim",          "runway",  128, 0 },
+    { "pc_rest",         "runway",  129, 0 },
+    { "pc_2l",           "runway",  130, 0 },
+    { "pc_8r",           "runway",  131, 0 },
+    { "lf_runway_hold_border", "runway", 132, 0 },
+    { "lf_dbl_solid_yellow_border", "yellow", 133, 0 },
+    { "pa_4r",           "runway",  134, 0 },
+    { "pa_dspl_thresh",  "runway",  135, 0 },
+    { "pa_dspl_arrows",  "runway",  136, 0 },
+    { "pa_L",            "runway",  137, 0 },
+    { "pa_3r",           "runway",  138, 0 },
+    { "pa_R",            "runway",  139, 0 },
+    { "pa_1r",           "runway",  140, 0 },
+    { "pc_dspl_thresh",  "runway",  141, 0 },
+    { "pc_dspl_arrows",  "runway",  142, 0 },
+    { "pc_R",            "runway",  143, 0 },
+    { "pc_2r",           "runway",  144, 0 },
+    { "pc_tz_three",     "runway",  145, 0 },
+    { "pc_tz_two_a",     "runway",  146, 0 },
+    { "pc_tz_two_b",     "runway",  147, 0 },
+    { "pc_tz_one_a",     "runway",  148, 0 },
+    { "pc_tz_one_b",     "runway",  149, 0 },
+    { "pc_stopway",      "runway",  150, 0 },
+    { "pc_L",            "runway",  151, 0 },
+    { "pc_3l",           "runway",  152, 0 },
+    { "pa_9r",           "runway",  153, 0 },
+    { "pa_shoulder",     "runway",  154, 0 },
+    { "lf_safetyzone_centerline", "runway", 155, 0 },
+    { "lf_sng_lane_queue_border", "runway", 156, 0 },
+    { "lf_sng_solid_white", "white", 157, 0 },
+    { "lf_sng_solid_yellow", "yellow", 158, 0 },
+    { "pc_7r",           "runway",  159, 0 },
+    { "pc_5r",           "runway",  160, 0 },
+    { "pa_6r",           "runway",  161, 0 },
+    { "pa_stopway",      "runway",  162, 0 },
+    { "lf_other_hold",   "runway",  163, 0 },
+    { "lf_sng_broken_yellow", "yellow", 164, 0 },
+    { "lf_ils_hold",     "runway",  165, 0 },
+    { "pa_tz_three",     "runway",  166, 0 },
+    { "pa_tz_two_a",     "runway",  167, 0 },
+    { "pa_tz_two_b",     "runway",  168, 0 },
+    { "pa_tz_one_a",     "runway",  169, 0 },
+    { "pa_tz_one_b",     "runway",  170, 0 },
+    { "lf_other_hold_border", "runway", 171, 0 },
+    { "lf_dbl_lane_queue_border", "runway", 172, 0 },
+    { "lf_ils_hold_border", "runway", 173, 0 },
+    { "lf_safetyzone_centerline_border", "runway", 174, 0 },
+    { "pc_4r",           "runway",  175, 0 },
+    { "pa_8r",           "runway",  176, 0 },
+    { "lf_dbl_lane_queue", "runway", 177, 0 },
+    { "lf_broken_white", "white", 179, 0 },
+    { "lf_checkerboard_white", "white", 180, 0 },
+    { "lf_sng_broken_yellow_border", "yellow", 181, 0 },
+    { "lf_sng_lane_queue", "runway", 182, 0 },
     // LAST ENTRY IN TABLE
     { 0, 0 }
 };
+
+static vSTGS vMissed;
+
+static int get_last_priority()
+{
+    int last = 0;
+    PMATMAP pmm = &sMatMap[0];
+    while ( pmm->mat ) {
+        last = pmm->priority;
+        pmm++;
+    }
+    return last;
+}
 
 static void init_used() 
 {
@@ -300,33 +393,55 @@ static void init_used()
     }
 }
 
+static void get_text_color(char *cp, PPALMAP ppm)
+{
+    double c;
+    unsigned int i;
+    strcpy(cp,"#");
+    c = 255.0 - (ppm->r * 255.0);
+    i = (unsigned int)(c + 0.5);
+    sprintf(EndBuf(cp),"%02x", i);
+    c = 255.0 - (ppm->g * 255.0);
+    i = (unsigned int)(c + 0.5);
+    sprintf(EndBuf(cp),"%02x", i);
+    c = 255.0 - (ppm->b * 255.0);
+    i = (unsigned int)(c + 0.5);
+    sprintf(EndBuf(cp),"%02x", i);
+}
+
+static void get_color(char *cp, PPALMAP ppm)
+{
+    double c;
+    unsigned int i;
+    strcpy(cp,"#");
+    c = ppm->r * 255.0;
+    i = (unsigned int)(c + 0.5);
+    sprintf(EndBuf(cp),"%02x", i);
+    c = ppm->g * 255.0;
+    i = (unsigned int)(c + 0.5);
+    sprintf(EndBuf(cp),"%02x", i);
+    c = ppm->b * 255.0;
+    i = (unsigned int)(c + 0.5);
+    sprintf(EndBuf(cp),"%02x", i);
+}
+
+
 static std::string get_pal_color( const char *name )
 {
     PPALMAP ppm = &sPalMap[0];
     char buf[256];
-    double c;
     char *cp = buf;
-    int i;
     std::string s("#f00000");
     while ( ppm->name ) {
         if (strcmp(ppm->name, name) == 0) {
-            c = ppm->r * 255.0;
-            i = (int)(c + 0.5);
-            strcpy(cp,"#");
-            sprintf(EndBuf(cp),"%02x", i);
-            c = ppm->g * 255.0;
-            i = (int)c;
-            sprintf(EndBuf(cp),"%02x", i);
-            c = ppm->b * 255.0;
-            i = (int)c;
-            sprintf(EndBuf(cp),"%02x", i);
+            get_color(cp,ppm);
             s = cp;
             ppm->used++;
             return s;
         }
         ppm++;
     }
-    printf("%s: oops local service called with %s'! NOT FOUND FIX ME ***\n", module, name );
+    SPRTF("%s: oops local service called with %s'! *** NOT FOUND FIX ME ***\n", module, name );
     return s;
 }
 
@@ -345,6 +460,10 @@ std::string get_mat_color( const char *mat )
         }
         pmm++;
     }
+    if (!string_in_vec(vMissed,mat)) {
+        SPRTF("%s: OOPS mat '%s'! *** NOT FOUND FIX ME ***\n", module, mat );
+        vMissed.push_back(mat);
+    }
     return "#ff0000";
 }
 
@@ -359,6 +478,8 @@ bool is_mat_in_list( const char *mat )
     }
     return false;
 }
+
+
 
 void outout_mat_color_counts()
 {
@@ -408,4 +529,183 @@ void outout_mat_color_counts()
 
 }
 
+static const char *html_head = "<!DOCTYPE html>\n"
+    "<html>\n"
+    "<head>\n"
+    "<meta charset=\"UTF-8\">\n"
+    "<title>Current Default Palette</title>\n"
+    "</head>\n"
+    "<body>\n"
+    "<h1>Current Default Palette</h1>\n";
+
+static const char *table =
+    "<table border=\"2\" summary=\"Default Palette Colors\" cellpadding=\"3\">\n";
+
+    // "<table summary=\"Default Palette Colors\" cellpadding=\"3\" cellspacing=\"3\">\n";
+
+
+std::string get_palette_html()
+{
+    std::string html(html_head);
+    PPALMAP ppm = sPalMap;
+    char buf[256];
+    char *cp = buf;
+    std::string td, ft;
+    if (!done_init) {
+        done_init = true;
+        init_used();
+    }
+
+    PMATMAP pmm = sMatMap;
+    html += "<p>Current Materials</p>\n";
+    html += table;
+    int i;
+    int max = 3;
+    int wrap = 0;
+    int cols = 4;
+    html += "<tr>\n";
+    while (wrap < max) {
+        html += "<th>Ord</th>";
+        html += "<th>Material</th>";
+        html += "<th>Type</th>";
+        html += "<th>Color</th>";
+        wrap++;
+    }
+    html += "<tr/>\n";
+    wrap = 0;
+    while ( pmm->mat ) {
+
+        std::string s = get_pal_color(pmm->color);
+        td = "<td bgcolor=\"";
+        td += s;
+        td += "\">";
+
+        if (wrap == 0)
+            html += "<tr>\n";
+
+        // col 1
+        sprintf(cp,"%d", pmm->priority);
+        html += "<td>";
+        html += cp;
+        html += "</td>\n";
+
+        // col 2
+        html += td;
+        html += pmm->mat;
+        html += "</td>";
+
+        // col 3
+        html += td;
+        html += pmm->color;
+        html += "</td>";
+
+        // col 4
+        html += td;
+        html += s;
+        html += "</td>";
+
+        wrap++;
+        if (wrap >= max) {
+            html += "</tr>\n";
+            wrap = 0;
+        }
+        pmm++;
+    }
+    if (wrap) {
+        while (wrap < max) {
+            for (i = 0; i < cols; i++)
+                html += "<td>&nbsp;</td>";
+            wrap++;
+        }
+        html += "</tr>\n";
+    }
+    html += "</table>\n";
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    html += "<p>Current Palette</p>\n";
+    html += table;
+    html += "<tr>\n";
+    html += "<th>Type</th>";
+    html += "<th>Color</th>";
+    html += "<th>RGB</th>";
+    html += "<th>Cnt</th>";
+    html += "<tr/>\n";
+    while (ppm->name) {
+        // setup font color
+        if (strcmp(ppm->name,"taxiway")) {
+            get_text_color(cp, ppm);
+            ft = "<font color=\"";
+            ft += cp;
+            ft += "\">";
+        } else {
+            ft = "<font color=\"white\">";
+        }
+
+        // setup background color
+        get_color(cp, ppm);
+        td = "<td bgcolor=\"";
+        td += cp;
+        td += "\">";
+
+        html += "<tr>\n";
+
+        html += td;
+        html += "<tt>";
+        html += ft;
+        html += ppm->name;
+        html += "</font>";
+        html += "</tt>";
+        html += "</td>\n";
+
+        html += td;
+        html += "<tt>";
+        html += ft;
+        html += cp;
+        html += "</font>";
+        html += "</tt>";
+        html += "</td>\n";
+
+        sprintf(cp,"r=%.3lf, g=%.3lf, b=%.3lf", ppm->r, ppm->g, ppm->b);
+        html += td;
+        html += "<tt>";
+        html += ft;
+        html += cp;
+        html += "</font>";
+        html += "</tt>";
+        html += "</td>\n";
+
+        sprintf(cp,"%d",ppm->used);
+        html += "<td>";
+        html += cp;
+        html += "</td>\n";
+
+        html += "</tr>\n";
+        ppm++;
+    }
+    html += "</table>\n";
+    ///////////////////////////////////////////////////////////////////////////////////
+
+
+    html += "<p>EOF</p>\n";
+
+    html += "</body>\n";
+    html += "</html>\n";
+    return html;
+}
+
+void close_palette()
+{
+    size_t ii, max = vMissed.size();
+    if (max) {
+        int last = get_last_priority();
+        SPRTF("%s: WARNING: Following %d materials NOT in table! *** FIX ME ***\n", module, (int)max);
+        std::string mat;
+        for (ii = 0; ii < max; ii++) {
+            mat = vMissed[ii];
+            last++;
+            SPRTF("    { \"%s\", \"UNKNOWN\", %d, 0 },\n", mat.c_str(), last );
+        }
+    }
+    vMissed.clear();
+}
 // eof = palette.cxx

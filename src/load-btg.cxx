@@ -32,6 +32,8 @@ static const char *module = "load-btg";
 // implementation
 load_btg::load_btg()
 {
+    init_mbbox(bb);
+    init_mbbox(tri_bb);
 }
 
 load_btg::~load_btg()
@@ -56,7 +58,7 @@ int load_btg::load( SGPath file, PMOPTS po )
         verb = po->verb;
         options = po->options;
         collect_xg = (options & opt_add_xg_text) ? true : false;
-        po->xg = "";
+        po->xg = "";    // start XG string
         s = file.file();
         if (string_in_vec(po->done,s.c_str())) 
             return btg_repeat;
@@ -75,6 +77,8 @@ int load_btg::load( SGPath file, PMOPTS po )
     }
     SPRTF("%s: Loaded in %s secs...\n", module, get_elapsed_stg(bgn));
     init_mbbox(bb);
+    init_mbbox(tri_bb);
+    mats.clear();
     const std::vector<SGVec3<double> >& wgs84_nodes = _chunk.get_wgs84_nodes();
 
     //const SGVec3<double>& gbs_p = _chunk.get_gbs_center();
@@ -84,8 +88,11 @@ int load_btg::load( SGPath file, PMOPTS po )
     lat = geodCent.getLatitudeDeg();
     lon = geodCent.getLongitudeDeg();
     elev = geodCent.getElevationM();
-
     SPRTF("%s: Center %lf,%lf,%lf (%lf,%lf,%lf)\n", module, lon, lat, elev, gbs_p[0], gbs_p[1], gbs_p[2]);
+    if (collect_xg) {
+        cp = stg.printf("; %s: Center %lf,%lf,%lf\n", file.c_str(), lon, lat, elev);
+        po->xg += cp;
+    }
     set_mbbox(bb,lat,lon,elev);
 
     kn = wgs84_nodes.size();
@@ -109,14 +116,21 @@ int load_btg::load( SGPath file, PMOPTS po )
         set_mbbox(bb,lat,lon,elev);
     }
     SPRTF("%s: BBOX %s\n", module, get_mbbox_stg(&bb));
-
+    if (collect_xg && (options & opt_add_xg_bbox)) {
+        char *cp = get_mbbox_xg_stg( &bb );
+        if (cp) {
+            po->xg += "color = green\n";
+            po->xg += cp;
+            po->xg += "NEXT\n";
+        }
+    }
     //const std::vector<SGVec4f>& get_colors() const { return colors; }
     v = _chunk.get_colors().size();
     //const std::vector<SGVec2f>& get_texcoords() const { return texcoords; }
     n = _chunk.get_texcoords().size();
     SPRTF("%s: Colors %u, texcoords %u\n", module, (int)v, (int)n );
 
-    // seems these are the airport LIGHTS
+    // seems these are the airport LIGHTS?
     v = _chunk.get_pts_v().size();
     n = _chunk.get_pts_n().size();
     if (v || VERB5(verb)) {
@@ -136,6 +150,7 @@ int load_btg::load( SGPath file, PMOPTS po )
                     lat = geod.getLatitudeDeg();
                     lon = geod.getLongitudeDeg();
                     elev = geod.getElevationM();
+                    set_mbbox(tri_bb,lat,lon,elev);
                     cp = stg.printf("%lf %lf ; %lf\nNEXT\n", lon, lat, elev );
                     if (VERB9(verb)) {
                         SPRTF("%s",cp);
@@ -161,14 +176,13 @@ int load_btg::load( SGPath file, PMOPTS po )
     n = _chunk.get_tris_n().size();
     const string_list& tri_mats = _chunk.get_tri_materials();
     m = tri_mats.size();
-    vSTGS mats;
     if (v || n || m || VERB5(verb)) {
         SPRTF("%s: tris v %u, n %u mats %u %s\n", module, (int)v, (int)n, (int)m,
             ((v == n) ? "" : "***CHECK ME!***"),
             ((v == m) ? "" : "***CHECK MATS!***"));
         if (v && collect_xg) {
             if (!m) {
-                po->xg += "color = yellow\n";
+                po->xg += "color = yellow\n"; // WHAT! no materials - just use yellow
             }
         }
         for (i = 0; i < v; i++) {
@@ -177,8 +191,10 @@ int load_btg::load( SGPath file, PMOPTS po )
             if (i < m) {
                 s = tri_mats[i];
                 if (!string_in_vec(mats,s.c_str())) {
-                    if (!is_mat_in_list(s.c_str()))
-                        mats.push_back("MISSING");
+                    if (!is_mat_in_list(s.c_str())) {
+                        SPRTF("%s: Warning: material '%s' MISSING! *** FIX ME ***\n", module, s.c_str());
+                        // mats.push_back("MISSING");
+                    }
                     mats.push_back(s);
                 }
                 s = get_mat_color(s.c_str());
@@ -203,6 +219,7 @@ int load_btg::load( SGPath file, PMOPTS po )
                     if (collect_xg) {
                         po->xg += cp;
                     }
+                    set_mbbox(tri_bb,lat,lon,elev);
                 } else {
                     SPRTF("; %s: Trouble: Index %u out of range %u\n", module,
                         (int)ui, (int)kn );
@@ -239,6 +256,21 @@ int load_btg::load( SGPath file, PMOPTS po )
             ((v == n) ? "" : "***CHECK ME!***"));
     }
     return btg_doneok;
+}
+
+int load_btg::add_mats( vSTGS &m )
+{
+    int count = 0;
+    size_t ii, max = mats.size();
+    std::string s;
+    for (ii = 0; ii < max; ii++) {
+        s = mats[ii];
+        if (!string_in_vec(m, s.c_str())) {
+            count++;
+            m.push_back(s);
+        }
+    }
+    return count;
 }
 
 // eof = load-btg.cxx

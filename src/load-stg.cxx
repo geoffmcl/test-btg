@@ -51,6 +51,8 @@ int load_stg::load( SGPath file, PMOPTS po )
     SPRTF("\n%s: Processing STG file '%s'\n", module, file.c_str());
     load_btg *pbtg = 0;
     init_mbbox(bb);
+    init_mbbox(tri_bb);
+    mats.clear();
     double bgn = get_seconds();
     std::string xg;
     while (getline(in, buf)) {
@@ -72,6 +74,8 @@ int load_stg::load( SGPath file, PMOPTS po )
             if (res == btg_doneok) {
                 loaded++;
                 merge_mbbox(bb, pbtg->bb);
+                merge_mbbox(tri_bb, pbtg->tri_bb);
+                pbtg->add_mats( mats );
                 if (po && (options & opt_add_xg_text)) {
                     xg += po->xg;
                 }
@@ -83,13 +87,16 @@ int load_stg::load( SGPath file, PMOPTS po )
         }
     }
     in.close();
-    if (pbtg)
-        delete pbtg;
 
     // SPRTF("%s: Loaded %d objs, BBOX %s, in %s secs.\n", module, tot_objs, get_mbbox_stg(&bb), get_elapsed_stg(bgn));
     const char *cp = po->stg.printf("%s: Found %d ents, %d objs", module, entries, tot_objs);
     if (already)
         cp = po->stg.appendf(", %d repeats", already);
+    if (pbtg) {
+        res = pbtg->add_mats( mats );
+        if (res)
+            cp = po->stg.appendf(", mats %d", res);
+    }
     if (loaded) {
         cp = po->stg.appendf(", %d loaded, bbox %s, in %s secs", loaded, get_mbbox_stg(&bb), get_elapsed_stg(bgn));
         if (po && (options & opt_add_xg_text)) {
@@ -97,7 +104,25 @@ int load_stg::load( SGPath file, PMOPTS po )
         }
     }
     SPRTF("%s\n",cp);
+
+    if (pbtg)
+        delete pbtg;
     return iret;
+}
+
+int load_stg::add_mats( vSTGS &m )
+{
+    int count = 0;
+    size_t ii, max = mats.size();
+    std::string s;
+    for (ii = 0; ii < max; ii++) {
+        s = mats[ii];
+        if (!string_in_vec(m, s.c_str())) {
+            count++;
+            m.push_back(s);
+        }
+    }
+    return count;
 }
 
 

@@ -16,6 +16,7 @@
 #define opt_show_wgs84_nodes    0x00000001
 
 #define opt_add_xg_text         0x00000010
+#define opt_add_xg_bbox         0x00000020
 
 typedef struct tagMOPTS {
     int verb;
