@@ -72,9 +72,15 @@ int load_btg::load( SGPath file, PMOPTS po )
     unsigned short us = _chunk.get_version(); // actually unsigned short
     SPRTF("\n%s: Loading file '%s', v %u, %s bytes.\n", module, file.c_str(), (unsigned int)us, get_nice_number64(fs));
     double bgn = get_seconds();
+#ifdef OLD_SIMGEAR
     if (!_chunk.read_bin(file.c_str())) {
     	return btg_noload;
     }
+#else // !#ifdef OLD_SIMGEAR
+    if (!_chunk.read_bin(file)) {
+        return btg_noload;
+    }
+#endif // #ifdef OLD_SIMGEAR
     SPRTF("%s: Loaded in %s secs...\n", module, get_elapsed_stg(bgn));
     init_mbbox(bb);
     init_mbbox(tri_bb);

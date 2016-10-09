@@ -182,7 +182,11 @@ void expand_dir( const char *dir )
 int add_input(char *arg)
 {
     SGPath sgp(arg);
+#ifdef OLD_SIMGEAR
     std::string fp = sgp.realpath();
+#else   // !#ifdef OLD_SIMGEAR
+    std::string fp = sgp.realpath().str();
+#endif  // #ifdef OLD_SIMGEAR y/n
     if (usr_input)
         free((void *)usr_input);
     usr_input = strdup(fp.c_str());
