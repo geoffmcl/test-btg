@@ -1,1 +1,6 @@
 bldlog-1.txt
+test_btg.VC.db
+3rdParty
+CPackConfig.cmake
+CPackSourceConfig.cmake
+zconf.h

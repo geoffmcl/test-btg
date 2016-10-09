@@ -14,6 +14,8 @@ set( test_btg_MAJOR 3 )
 set( test_btg_MINOR 0 )
 set( test_btg_POINT 0 )
 
+option(USE_EXTERN_ZLIB "Set ON to use find and use extrnal zlib library"  OFF)
+
 if (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(IS_64_BIT 1)
     message(STATUS "*** Compiling in 64-bit environmnet")
@@ -64,22 +66,75 @@ set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MSVC_LD_FLAGS}" )
 # Setup MSVC 3rd party directories
 # is this required??? include( ConfigureMsvc3rdParty )
 
-# SIMGEAR_FOUND, if false, do not try to link to SimGear
-# SIMGEAR_CORE_LIBRARIES, a list of the core static libraries
-# SIMGEAR_LIBRARIES, a list of all the static libraries (core + scene)
-# SIMGEAR_INCLUDE_DIR, where to find the headers
 #   ZLIB_INCLUDE_DIRS   - where to find zlib.h, etc.
 #   ZLIB_LIBRARIES      - List of libraries when using zlib.
 #   ZLIB_FOUND          - True if zlib found.
 #   ZLIB_VERSION_STRING - The version of zlib found (x.y.z)
+if (USE_EXTERN_ZLIB)
+    find_package(ZLIB REQUIRED)
+else ()
+    set(ZLIB_INCLUDE_DIRS 3rdParty/zlib_1_2_8)
+    configure_file(${ZLIB_INCLUDE_DIRS}/zconf.h.in ${CMAKE_BINARY_DIR}/zconf.h @ONLY)
+    ### add_subdirectory( ${ZLIB_INCLUDE_DIRS} ) # build internal ZLIB static
+    set(name zlibstatic)
+    set(dir ${ZLIB_INCLUDE_DIRS})
+    set (${name}_HDRS
+        ${dir}/zlib.h
+        ${dir}/crc32.h
+        ${dir}/deflate.h
+        ${dir}/gzguts.h
+        ${dir}/inffast.h
+        ${dir}/inffixed.h
+        ${dir}/inflate.h
+        ${dir}/inftrees.h
+        ${dir}/trees.h
+        ${dir}/zutil.h
+        ${CMAKE_BINARY_DIR}/zconf.h
+        )
+    set (${name}_SRCS
+        ${dir}/adler32.c
+        ${dir}/compress.c
+        ${dir}/crc32.c
+        ${dir}/deflate.c
+        ${dir}/gzclose.c
+        ${dir}/gzlib.c
+        ${dir}/gzread.c
+        ${dir}/gzwrite.c
+        ${dir}/inflate.c
+        ${dir}/infback.c
+        ${dir}/inftrees.c
+        ${dir}/inffast.c
+        ${dir}/trees.c
+        ${dir}/uncompr.c
+        ${dir}/zutil.c
+        # ${dir}/zlib.rc
+        )
+    if (WIN32 AND NOT MINGW)
+        list(APPEND ${name}_SRCS ${dir}/win32/zlib.rc)
+    endif ()
+    add_library( ${name} ${${name}_SRCS} ${${name}_HDRS} )
+    list(APPEND add_LIBS ${name})
+    include_directories( ${dir} ${CMAKE_BINARY_DIR} )
+    set(ZLIB_FOUND 1)
+    set(ZLIB_LIBRARIES ${name})
+    message(STATUS "*** Using internal zlib source in ${ZLIB_INCLUDE_DIRS}")
+endif ()
 
+# SIMGEAR_FOUND, if false, do not try to link to SimGear
+# SIMGEAR_CORE_LIBRARIES, a list of the core static libraries
+# SIMGEAR_LIBRARIES, a list of all the static libraries (core + scene)
+# SIMGEAR_INCLUDE_DIR, where to find the headers
+message(STATUS "*** Doing dearch for SimGear (and zlib)")
 find_package(SimGear "2.6" REQUIRED)
 list(APPEND add_LIBS ${SIMGEAR_LIBRARIES})
 message(STATUS "Found SG libs ${SIMGEAR_LIBRARIES} inc ${SIMGEAR_INCLUDE_DIR}")
 include_directories( ${SIMGEAR_INCLUDE_DIR} )
-list(APPEND add_LIBS ${ZLIB_LIBRARIES})
-message(STATUS "Found ZLIB libs ${ZLIB_LIBRARIES} inc ${ZLIB_INCLUDE_DIRS}")
-include_directories( ${ZLIB_INCLUDE_DIRS} )
+if (USE_EXTERN_ZLIB)
+    list(APPEND add_LIBS ${ZLIB_LIBRARIES})
+    message(STATUS "Found ZLIB libs ${ZLIB_LIBRARIES} inc ${ZLIB_INCLUDE_DIRS}")
+    include_directories( ${ZLIB_INCLUDE_DIRS} )
+endif ()
+
 #   Boost_FOUND            - True if headers and requested libraries were found
 #   Boost_INCLUDE_DIRS     - Boost include directories
 find_package(Boost   REQUIRED)
@@ -153,6 +208,7 @@ set(${name}_HDRS
     )
 add_executable( ${name} ${${name}_SRCS} ${${name}_HDRS} )
 if (add_LIBS)
+    message(STATUS "*** target_link_libraries( ${name} ${add_LIBS} )")
     target_link_libraries( ${name} ${add_LIBS} )
 endif ()
 if (MSVC)
