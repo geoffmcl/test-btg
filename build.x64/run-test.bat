@@ -13,7 +13,8 @@
 :GOTCMD
 
 @REM No longer needed - using static libs
-@REM set PATH=%TMP3RD%;%PATH%
+@REM But if using the DLL, then
+@set PATH=%TMP3RD%;%PATH%
 
 %TMPEXE% %TMPCMD%
 
