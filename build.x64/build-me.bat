@@ -5,16 +5,18 @@
 @set BLDDIR=%CD%
 @set TMPVERS=
 @set TMPSRC=..
-@set SET_BAT=%ProgramFiles(x86)%\Microsoft Visual Studio 10.0\VC\vcvarsall.bat
+@set VCVERS=14
+@set SET_BAT=%ProgramFiles(x86)%\Microsoft Visual Studio %VCVERS%.0\VC\vcvarsall.bat
 @if NOT EXIST "%SET_BAT%" goto NOBAT
-@set TMPOPTS=-G "Visual Studio 10 Win64"
+@set TMPOPTS=-G "Visual Studio %VCVERS% Win64"
 @set DOPAUSE=pause
 
 @REM To find OSG, and 3rdParty headers, libraries
-@set TMPSG=X:\install\msvc100-64\simgear
+@set TMPSG=X:\install\msvc%VCVERS%0-64\simgear
 @set TMP3RD=X:\3rdParty.x64
+@set TMPBOOST=c:\local\boost_1_62_0
 @REM set TMPOSG=%TMPDRV%\install\msvc100-64\OpenSceneGraph
-@set TMPBOOST=X:\install\msvc100-64\boost
+@REM set TMPBOOST=X:\install\msvc%VCVERS%0-64\boost
 @if NOT EXIST %TMP3RD%\nul goto NO3RD
 @if NOT EXIST %TMPSG%\nul goto NOSG
 @if NOT EXIST %TMPBOOST%\nul goto NOBOOST
