@@ -182,6 +182,9 @@ Null			other
 Unknown			other
 
     ======================================================================= */
+// #############################################################
+//  const char *mat, const char *color, int priority, count;
+// #############################################################
 MATMAP sMatMap[] = {
     { "Hole",            "magenta",  0, 0 },
     // ========
@@ -271,6 +274,7 @@ MATMAP sMatMap[] = {
     { "Scrub",           "green",    72, 0 }, // other
     { "ShrubGrassCover", "green",    73, 0 }, // other	# Mixed Shrubland/Grassland
     { "SavannaCover",    "brown",    74, 0 }, // other	# Savanna
+    { "SomeSort",        "brown",    74, 0 }, // other	# Savanna
     { "Orchard",         "brown",    75, 0 }, // other	# Orchard
     { "DeciduousForest", "green",    76, 0 }, // other	# Deciduous Forest
     { "EvergreenForest", "green",    77, 0 }, // other	# Evergreen Forest
