@@ -27,10 +27,24 @@ typedef struct tagPALMAP {
     int spare;
 } PALMAP, *PPALMAP;
 
+/* Atlas default.ap
+# Water
+Colour water		0.671 0.737 0.745 1.0
+# Cities
+Colour city		    1.000 0.973 0.459 1.0
+# Transportation
+Colour road		    0.250 0.250 0.250 1.0
+Colour railroad		1.000 0.000 0.000 1.0
+# Airports
+Colour runway		0.0   0.0   0.0	  1.0
+Colour taxiway		0.5   0.5   0.5   1.0
+*/
+
 //# Physical feature colours
 PALMAP sPalMap[] = {
     //# Water
-    { "water", 0.2, 0.2, 0.745, 1.0, 0, 0 },
+    { "water", 0.078, 0.750, 1.000, 1.0, 0, 0 },
+    // { "water", 0.2, 0.2, 0.745, 1.0, 0, 0 },
     // # Cities
     { "city", 1.000, 0.973, 0.459, 1.0, 0 , 0 },
     // # Transportation
