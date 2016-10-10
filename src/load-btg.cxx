@@ -43,7 +43,7 @@ load_btg::~load_btg()
 int load_btg::load( SGPath file, PMOPTS po )
 {
     size_t v, n, k, i, j, kn, m;
-    size_t ui;
+    size_t ui, u0, u1, u2;
     double lat,lon,elev;
     SGVec3d gbs_p, nd, node;
     SGGeod geodCent, geod;
@@ -253,6 +253,9 @@ int load_btg::load( SGPath file, PMOPTS po )
     if (v || VERB5(verb)) {
         SPRTF("%s: strips v %u, n %u %s\n", module, (int)v, (int)n,
             ((v == n) ? "" : "***CHECK ME!***"));
+        if (v) {
+            SPRTF("%s: TODO: Output of 'strips' not yet coded!\n", module);
+        }
     }
 
     v = _chunk.get_fans_v().size();
@@ -260,6 +263,98 @@ int load_btg::load( SGPath file, PMOPTS po )
     if (v || VERB5(verb)) {
         SPRTF("%s: fans v %u, n %u %s\n", module, (int)v, (int)n,
             ((v == n) ? "" : "***CHECK ME!***"));
+        for (i = 0; i < v; i++) {
+            // int_list il = _chunk.get_tris_v().at(i);
+            int_list il = _chunk.get_fans_v().at(i);
+            s = "";
+            s = _chunk.get_fan_materials()[i];
+            if (s.size()) {
+                if (!string_in_vec(mats, s.c_str())) {
+                    if (!is_mat_in_list(s.c_str())) {
+                        SPRTF("%s: Warning: material '%s' MISSING! *** FIX ME ***\n", module, s.c_str());
+                        // mats.push_back("MISSING");
+                    }
+                    mats.push_back(s);
+                }
+                s = get_mat_color(s.c_str());
+                po->xg += "color = ";
+                po->xg += s;
+                po->xg += "\n";
+            }
+            k = il.size();  // this should ALWAYS be 3, or more, but
+            if (k < 3) {
+                continue;
+            }
+
+            // get first two offsets into wsg84 points - u0 u1
+            u0 = il.at(0);
+            if (u0 >= kn) {
+                SPRTF("; %s: Trouble: Index %u out of range %u\n", module,
+                    (int)u0, (int)kn);
+                continue;
+            }
+            u1 = il.at(1);
+            if (u1 >= kn) {
+                SPRTF("; %s: Trouble: Index %u out of range %u\n", module,
+                    (int)u1, (int)kn);
+                continue;
+            }
+            // Have 2 offsets, so start at third
+            for (j = 2; j < k; j++) {
+                u2 = il.at(j);
+                if (u2 < kn) {
+                    // add three points of this fan
+                    nd = wgs84_nodes[u0];
+                    node = (nd + gbs_p);
+                    geod = SGGeod::fromCart(node);
+                    lat = geod.getLatitudeDeg();
+                    lon = geod.getLongitudeDeg();
+                    elev = geod.getElevationM();
+                    cp = stg.printf("%lf %lf ; %lf %s\n", lon, lat, elev, s.c_str());
+                    if (VERB9(verb)) {
+                        SPRTF("%s", cp);
+                    }
+                    if (collect_xg) {
+                        po->xg += cp;
+                    }
+                    set_mbbox(tri_bb, lat, lon, elev);
+                    nd = wgs84_nodes[u1];
+                    node = (nd + gbs_p);
+                    geod = SGGeod::fromCart(node);
+                    lat = geod.getLatitudeDeg();
+                    lon = geod.getLongitudeDeg();
+                    elev = geod.getElevationM();
+                    cp = stg.printf("%lf %lf ; %lf %s\n", lon, lat, elev, s.c_str());
+                    if (VERB9(verb)) {
+                        SPRTF("%s", cp);
+                    }
+                    if (collect_xg) {
+                        po->xg += cp;
+                    }
+                    set_mbbox(tri_bb, lat, lon, elev);
+                    nd = wgs84_nodes[u2];
+                    node = (nd + gbs_p);
+                    geod = SGGeod::fromCart(node);
+                    lat = geod.getLatitudeDeg();
+                    lon = geod.getLongitudeDeg();
+                    elev = geod.getElevationM();
+                    cp = stg.printf("%lf %lf ; %lf %s\n", lon, lat, elev, s.c_str());
+                    if (VERB9(verb)) {
+                        SPRTF("%s", cp);
+                    }
+                    if (collect_xg) {
+                        po->xg += cp;
+                    }
+                    set_mbbox(tri_bb, lat, lon, elev);
+                    po->xg += "NEXT\n";
+                }
+                else {
+                    SPRTF("; %s: Trouble: Index %u out of range %u\n", module,
+                        (int)u2, (int)kn);
+                }
+                u1 = u2;    // update the 2nd with third point
+            }
+        }
     }
     return btg_doneok;
 }
