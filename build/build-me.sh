@@ -1,23 +1,25 @@
 #!/bin/sh
-#< build-me.sh - 20130401 - test-btg project
+#< build-me.sh - 20161010 - 20130401 - test-btg project
 BN=`basename $0`
 TMPPRJ="test-btg"
 TMPLOG="bldlog-1.txt"
 TMPINST="$HOME"
-
+TMPSG="/home/geoff/fg/next/install/simgear"
+#TMPSG="/media/Disk2/FG/fg21/install/simgear"
 if [ -f "$TMPLOG" ]; then
     rm -f -v $TMPLOG
 fi
 
 echo "$BN: Build of $TMPPRJ" > $TMPLOG
 
-CMOPTS="-DCMAKE_PREFIX_PATH=/media/Disk2/FG/fg21/install/simgear"
+CMOPTS="-DCMAKE_PREFIX_PATH=$TMPSG"
 CMOPTS="$CMOPTS -DCMAKE_INSTALL_PREFIX=$TMPINST"
+CMOPTS="$CMOPTS -DUSE_EXTERN_ZLIB:BOOL=ON"
 
 export OSG_DIR=/media/Disk2/FG/fg21/install/OSGtrunk
 echo "$BN: exported OSG_DIR=$OSG_DIR"
 echo "$BN: exported OSG_DIR=$OSG_DIR" >> $TMPLOG
-export SIMGEAR_DIR=/media/Disk2/FG/fg21/install/simgear
+export SIMGEAR_DIR=$TMPSG
 echo "$BN: exported SIMGEAR_DIR=$SIMGEAR_DIR"
 echo "$BN: exported SIMGEAR_DIR=$SIMGEAR_DIR" >> $TMPLOG
 
