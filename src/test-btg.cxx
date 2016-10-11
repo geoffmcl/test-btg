@@ -1,7 +1,7 @@
 /*\
  * test-btg.cxx
  *
- * Copyright (c) 2015 - Geoff R. McLane
+ * Copyright (c) 2015 - 2016 - Geoff R. McLane
  * Licence: GNU GPL version 2
  *
 \*/
@@ -10,6 +10,7 @@
 #include <string.h> // for strdup(), ...
 #include <simgear/misc/sg_path.hxx> // SGPath
 #include <simgear/io/sg_binobj.hxx> // SGBinObject
+// #include <simgear/compiler.h> // define SG_COMPILER_STR
 #include <iostream>
 #include <fstream>
 #ifdef WIN32
@@ -22,6 +23,13 @@
 #include "palette.hxx"
 #include "sprtf.hxx"
 
+#ifndef TEST_BTG_VERSION
+#define TEST_BTG_VERSION "1.?.?"
+#endif
+#ifndef TEST_BTG_DATE
+#define TEST_BTG_DATE "1970.01.01"    // Use epoch date as signal var not set! January 1, 1970
+#endif
+
 static const char *module = "test-btg";
 static bool debug_on = false;
 static const char *def_log = "tempbtg.txt";
@@ -29,25 +37,34 @@ static unsigned int options = 0;
 static const char *usr_input = 0;
 static const char *xg_file = 0;
 static int verbosity = 0;
-static const char *def_input = "X:\\fgdata\\Scenery\\Terrain\\w130n30\\w123n37\\942026.stg";
-static const char *def_input2 = "X:\\fgdata\\Scenery\\Terrain\\w130n30\\w123n37\\KSFO.btg.gz";
+// static const char *def_input = "X:\\fgdata\\Scenery\\Terrain\\w130n30\\w123n37\\942026.stg";
+// static const char *def_input2 = "X:\\fgdata\\Scenery\\Terrain\\w130n30\\w123n37\\KSFO.btg.gz";
 static bool recursive = false;
 static bool add_tri_bbox = false;
+static const char *app_version = TEST_BTG_VERSION;
+static const char *app_date = TEST_BTG_DATE;
 
 static vSTGS vInputs;
 
+void show_version()
+{
+    SPRTF("%s: Date %s, Version %s\n", module, app_date, app_version);
+}
 void give_help( char *name )
 {
-    SPRTF("\n%s: usage: [options] usr_input(s)\n", module);
+    SPRTF("\n");
+    show_version();
+    SPRTF("Usage: [options] usr_input(s)\n");
     SPRTF("Options:\n");
-    SPRTF(" --help  (-h or -?) = This help and exit(2)\n");
+    SPRTF(" --help  (-h or -?) = This help and exit(0)\n");
     SPRTF(" --verb[n]     (-v) = Bump or set verbosity. (def=%d)\n", verbosity);
     SPRTF(" --in <file>   (-i) = Input files list to process.\n");
-    SPRTF(" --recurs      (-r) = Recursivly process sub-directories. (def=%s)\n",
+    SPRTF(" --recurs      (-r) = Recursively process sub-directories. (def=%s)\n",
         recursive ? "On" : "Off");
     SPRTF(" --xg <file>   (-x) = Output xg string to the file. (def=%s)\n",
         (xg_file && (options & opt_add_xg_text)) ? "On" : "Off" );
-    SPRTF(" --bbox        (-b) = Add lights and triangle bbox to above xg file.\n");
+    SPRTF(" --bbox        (-b) = Add green bounding box to above xg file. (def=%s)\n",
+        add_tri_bbox ? "Yes" : "No");
     SPRTF("\n");
     SPRTF(" --out <html>  (-o) = Output palette html file, and exit. Only for debug.\n");
     SPRTF("\n");
@@ -179,6 +196,18 @@ void expand_dir( const char *dir )
     }
 }
 
+int got_wild(char *arg)
+{
+    while (*arg) {
+        if (*arg == '?')
+            return 1;
+        if (*arg == '*')
+            return 1;
+        arg++;
+    }
+    return 0;
+}
+
 int add_input(char *arg)
 {
     SGPath sgp(arg);
@@ -198,7 +227,12 @@ int add_input(char *arg)
             vInputs.push_back(usr_input);
         }
     } else {
-        SPRTF("%s: Unable to 'stat' file (or dir) '%s'! Aborting...\n", module, usr_input);
+        if (got_wild(arg)) {
+            SPRTF("%s: TODO: Handle wild cards, like '%s'! Aborting...\n", module, usr_input);
+        }
+        else {
+            SPRTF("%s: Unable to 'stat' file (or dir) '%s'! Aborting...\n", module, usr_input);
+        }
         return 1;
     }
     return 0;
@@ -242,6 +276,10 @@ int parse_args( int argc, char **argv )
     char *arg, *sarg;
     for (i = 1; i < argc; i++) {
         arg = argv[i];
+        if (strcmp(arg, "--version") == 0) {
+            show_version();
+            return 2;
+        }
         i2 = i + 1;
         if (*arg == '-') {
             sarg = &arg[1];
@@ -323,6 +361,8 @@ int parse_args( int argc, char **argv )
                 return 1;
         }
     }
+
+#if 0 // 0000000000000000000000000000000000000000000000000000000000000000
     if (debug_on && !usr_input) {
         if (is_file_or_directory(def_input) == MDT_FILE) {
             vInputs.push_back(def_input);
@@ -330,8 +370,9 @@ int parse_args( int argc, char **argv )
         if (is_file_or_directory(def_input2) == MDT_FILE) {
             vInputs.push_back(def_input2);
         }
-
     }
+#endif // 000000000000000000000000000000000000000000000000000000000000000
+
     i = (int)vInputs.size();
     if ( i == 0 ) {
         SPRTF("%s: No user input found in command!\n", module);
@@ -390,8 +431,11 @@ int main( int argc, char **argv )
     int ret, iret = 0;
     do_log_file(argv[0]);
     iret = parse_args(argc,argv);
-    if (iret)
+    if (iret) {
+        if (iret == 2)
+            iret = 0;
         return iret;
+    }
     SGPath file(usr_input);
     load_stg *pls = new load_stg;
     load_btg *plb = new load_btg;
