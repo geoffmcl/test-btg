@@ -2,7 +2,7 @@
 @set TMPEXE=Release\test-btg.exe
 @if NOT EXIST %TMPEXE% goto NOEXE
 @set TMP3RD=X:\3rdParty.x64\bin
-@if NOT EXIST %TMP3RD%\nul goto NOBIN
+@REM if NOT EXIST %TMP3RD%\nul goto NOBIN
 
 @set TMPCMD=
 :RPT
@@ -14,7 +14,7 @@
 
 @REM No longer needed - using static libs
 @REM But if using the DLL, then
-@set PATH=%TMP3RD%;%PATH%
+@REM set PATH=%TMP3RD%;%PATH%
 
 %TMPEXE% %TMPCMD%
 
@@ -25,7 +25,7 @@
 @goto END
 
 :NOBIN
-@echo Error: Can NOT locate %TMPBIN%! *** FIX ME *
+@echo Error: Can NOT locate %TMP3RD%! *** FIX ME *
 @goto END
 
 :END
