@@ -48,12 +48,14 @@ int load_btg::load( SGPath file, PMOPTS po )
     SGVec3d gbs_p, nd, node;
     SGGeod geodCent, geod;
     SGBinObject _chunk;
+    SGBucket bucket;
     int verb = 0;
     unsigned int options = 0;
     sprtfstr stg;
     const char *cp;
     bool collect_xg = false;
     std::string s;
+    std::string first;
     if (po) {
         verb = po->verb;
         options = po->options;
@@ -69,8 +71,7 @@ int load_btg::load( SGPath file, PMOPTS po )
         return btg_nostat;
     }
     long long fs = get_last_file_size();
-    unsigned short us = _chunk.get_version(); // actually unsigned short
-    SPRTF("\n%s: Loading file '%s', v %u, %s bytes.\n", module, file.c_str(), (unsigned int)us, get_nice_number64(fs));
+    SPRTF("\n%s: Loading file '%s', %s bytes.\n", module, file.c_str(), get_nice_number64(fs));
     double bgn = get_seconds();
 #ifdef OLD_SIMGEAR
     if (!_chunk.read_bin(file.c_str())) {
@@ -81,7 +82,8 @@ int load_btg::load( SGPath file, PMOPTS po )
         return btg_noload;
     }
 #endif // #ifdef OLD_SIMGEAR
-    SPRTF("%s: Loaded in %s secs...\n", module, get_elapsed_stg(bgn));
+    unsigned short us = _chunk.get_version(); // actually unsigned short
+    SPRTF("%s: Loaded BTG v%u, in %s secs...\n", module, (unsigned short)us, get_elapsed_stg(bgn));
     init_mbbox(bb);
     init_mbbox(tri_bb);
     mats.clear();
@@ -90,6 +92,7 @@ int load_btg::load( SGPath file, PMOPTS po )
     //const SGVec3<double>& gbs_p = _chunk.get_gbs_center();
     gbs_p = _chunk.get_gbs_center();
     geodCent = SGGeod::fromCart(gbs_p);
+    bucket.set_bucket(geodCent);
 
     lat = geodCent.getLatitudeDeg();
     lon = geodCent.getLongitudeDeg();
@@ -100,6 +103,10 @@ int load_btg::load( SGPath file, PMOPTS po )
         po->xg += cp;
     }
     set_mbbox(bb,lat,lon,elev);
+
+    SPRTF("%s: Bucket: %s/%d\n", module,
+        bucket.gen_base_path().c_str(),
+        bucket.gen_index());
 
     kn = wgs84_nodes.size();
     n = _chunk.get_normals().size();
@@ -178,6 +185,7 @@ int load_btg::load( SGPath file, PMOPTS po )
         }
     }
 
+    // Terrain/Airport tris
     v = _chunk.get_tris_v().size();
     n = _chunk.get_tris_n().size();
     const string_list& tri_mats = _chunk.get_tri_materials();
@@ -209,6 +217,7 @@ int load_btg::load( SGPath file, PMOPTS po )
                 po->xg += "\n";
             }
             k = il.size();  // this should ALWAYS be 3, but
+            first = "";
             for (j = 0; j < k; j++) {
                 ui = il.at(j);
                 if (ui < kn) {
@@ -224,21 +233,29 @@ int load_btg::load( SGPath file, PMOPTS po )
                     }
                     if (collect_xg) {
                         po->xg += cp;
+                        if (j == 0)
+                            first = cp; // keep first point to close polygon (tringles here)
                     }
+
                     set_mbbox(tri_bb,lat,lon,elev);
                 } else {
                     SPRTF("; %s: Trouble: Index %u out of range %u\n", module,
                         (int)ui, (int)kn );
+                    break;
                 }
             }
             if (collect_xg) {
                 if (VERB9(verb)) {
                     SPRTF("NEXT\n");
                 }
+                if (first.size())
+                    po->xg += first;
                 po->xg += "NEXT\n";
             }
         }
     }
+
+    // show materials
     i = mats.size();
     if (m && i && VERB2(verb)) {
         cp = stg.printf("%s: mats %u ", module, (int)i);
@@ -248,6 +265,8 @@ int load_btg::load( SGPath file, PMOPTS po )
         }
         SPRTF("%s\n",cp);
     }
+
+    // Terrain/Airport strips
     v = _chunk.get_strips_v().size();
     n =_chunk.get_strips_n().size();
     if (v || VERB5(verb)) {
@@ -258,6 +277,7 @@ int load_btg::load( SGPath file, PMOPTS po )
         }
     }
 
+    // Terrain/Airport fans
     v = _chunk.get_fans_v().size();
     n = _chunk.get_fans_n().size();
     if (v || VERB5(verb)) {
@@ -310,20 +330,23 @@ int load_btg::load( SGPath file, PMOPTS po )
                     lat = geod.getLatitudeDeg();
                     lon = geod.getLongitudeDeg();
                     elev = geod.getElevationM();
+                    set_mbbox(tri_bb, lat, lon, elev);
                     cp = stg.printf("%lf %lf ; %lf %s\n", lon, lat, elev, s.c_str());
                     if (VERB9(verb)) {
                         SPRTF("%s", cp);
                     }
                     if (collect_xg) {
                         po->xg += cp;
+                        first = cp;
                     }
-                    set_mbbox(tri_bb, lat, lon, elev);
+
                     nd = wgs84_nodes[u1];
                     node = (nd + gbs_p);
                     geod = SGGeod::fromCart(node);
                     lat = geod.getLatitudeDeg();
                     lon = geod.getLongitudeDeg();
                     elev = geod.getElevationM();
+                    set_mbbox(tri_bb, lat, lon, elev);
                     cp = stg.printf("%lf %lf ; %lf %s\n", lon, lat, elev, s.c_str());
                     if (VERB9(verb)) {
                         SPRTF("%s", cp);
@@ -331,22 +354,22 @@ int load_btg::load( SGPath file, PMOPTS po )
                     if (collect_xg) {
                         po->xg += cp;
                     }
-                    set_mbbox(tri_bb, lat, lon, elev);
                     nd = wgs84_nodes[u2];
                     node = (nd + gbs_p);
                     geod = SGGeod::fromCart(node);
                     lat = geod.getLatitudeDeg();
                     lon = geod.getLongitudeDeg();
                     elev = geod.getElevationM();
+                    set_mbbox(tri_bb, lat, lon, elev);
                     cp = stg.printf("%lf %lf ; %lf %s\n", lon, lat, elev, s.c_str());
                     if (VERB9(verb)) {
                         SPRTF("%s", cp);
                     }
                     if (collect_xg) {
                         po->xg += cp;
+                        po->xg += first;
+                        po->xg += "NEXT\n";
                     }
-                    set_mbbox(tri_bb, lat, lon, elev);
-                    po->xg += "NEXT\n";
                 }
                 else {
                     SPRTF("; %s: Trouble: Index %u out of range %u\n", module,

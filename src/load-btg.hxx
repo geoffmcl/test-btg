@@ -10,6 +10,7 @@
 #define _LOAD_BTG_HXX_
 #include <simgear/misc/sg_path.hxx> // SGPath
 #include <simgear/io/sg_binobj.hxx> // SGBinObject
+#include <simgear/bucket/newbucket.hxx> // SGBucket
 #include "utils.hxx"
 #include "test-btg.hxx"
 

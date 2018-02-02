@@ -6,10 +6,13 @@
  *
 \*/
 
+#include <time.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h> // for strdup(), ...
 #include <simgear/misc/sg_path.hxx> // SGPath
 #include <simgear/io/sg_binobj.hxx> // SGBinObject
+#include <simgear/io/lowlevel.hxx>  // reading services
 // #include <simgear/compiler.h> // define SG_COMPILER_STR
 #include <iostream>
 #include <fstream>
@@ -17,6 +20,7 @@
 #include <Windows.h>
 #endif
 #include <dirent.h>
+#include <zlib.h>
 #include "load-stg.hxx"
 #include "load-btg.hxx"
 #include "test-btg.hxx"
@@ -70,6 +74,7 @@ void give_help( char *name )
     SPRTF("\n");
     SPRTF(" In essence, given either a btg.gz file list, or a stg file, or even a\n");
     SPRTF(" directory, load and enumerate the contents of the btg.gz files found.\n\n");
+    SPRTF(" Details of the BTG (Binary TerraGear) format: http://wiki.flightgear.org/BTG_File_Format");
     // TODO: More help
 }
 
@@ -418,6 +423,102 @@ void do_log_file(char *name)
     set_log_file(cp,false);
 }
 
+/*
+    BTG structures must be byte aligned
+*/
+#pragma pack(push,1)
+
+/*
+    Header
+Byte offset	Type	Description
+0	unsigned short	Version (currently 7 or 10)
+2	unsigned short	Magic Number 0x5347 ("SG")
+4	unsigned int	Creation Time (seconds since the epoch)
+8	unsigned short	Number of Toplevel Objects
+*/
+typedef struct tagBTG_HEADER {
+    unsigned short	Version;    // (currently 7 or 10)
+    unsigned short	Magic;      // Number 0x5347 ("SG")
+    unsigned int	Creation;   // Time(seconds since the epoch)
+    union {
+        unsigned short svers;
+        unsigned int ivers;
+    }Number;
+         // of Toplevel Objects
+}BTG_HEADER, *PBTG_HEADER;
+
+#pragma pack(pop)
+
+int test_btg(SGPath file, PMOPTS po)
+{
+    int iret = 0;
+    BTG_HEADER btgh = { 0 };
+    gzFile fp = gzopen(file.c_str(), "rb");
+    size_t len, size = sizeof(btgh);
+    if (!fp)
+        return 1;
+
+    sgClearReadError();
+    // read headers
+    unsigned int header;
+    sgReadUInt(fp, &header);
+    if (((header & 0xFF000000) >> 24) == 'S' &&
+        ((header & 0x00FF0000) >> 16) == 'G') {
+        btgh.Magic = (header & 0xFFFF0000) >> 16;
+        // read file version
+        btgh.Version = (header & 0x0000FFFF);
+    }
+    else {
+        SPRTF("%s: BTG Magic NOT 'SG', got %x... Aborting...\n", module, header);
+        iret = 2;
+        goto Exit;
+    }
+    sgReadUInt(fp, &btgh.Creation);
+
+    // read number of top level objects
+    if (btgh.Version >= 10) { // version 10 extends everything to be 32-bit
+        sgReadInt(fp,(int *)&btgh.Number);
+    }
+    else if (btgh.Version >= 7) {
+        uint16_t v;
+        sgReadUShort(fp, &v);
+        btgh.Number.svers = v;
+    }
+    else {
+        int16_t v;
+        sgReadShort(fp, &v);
+        btgh.Number.svers = v;
+    }
+
+    time_t epsecs = btgh.Creation;
+    /* Convert to local time format. */
+    char tb[256];
+    char *ptime = (char *)"Not available";
+    char *stime = ctime(&epsecs);
+    if (stime) {
+        char *tmp = tb;
+        strcpy(tmp, stime);
+        size = strlen(stime);
+        for (len = size - 1; len > 0; len--) {
+            if (tmp[len] > ' ')
+                break;
+            tmp[len] = 0;
+        }
+        ptime = tmp;
+    }
+    SPRTF("%s: SG BTG Version %u, Date %s, Number %d\n",module, btgh.Version, ptime, btgh.Number);
+
+    if (sgReadError()) {
+        iret = 3;
+        SPRTF("%s: BTG Read Error... Aborting...\n", module );
+    }
+
+Exit:
+    // clean up...
+    gzclose(fp);
+    return 0;   // looks like a BTG file
+}
+
 // for ZLIB DLL load - now using static library if found
 // PATH=X:\3rdParty.x64\bin;%PATH%
 // samples: X:/fgdata/Scenery/Terrain/w130n30/w122n37/KSCK.btg.gz - points and tris
@@ -452,7 +553,9 @@ int main( int argc, char **argv )
         if (string_in_vec( pmo->done, file.file().c_str()))
             continue;
         if (is_btg_file(file.c_str())) {
-            ret = plb->load(file, pmo);
+            ret = test_btg(file, pmo); // need zlib.h for this
+            if (ret == 0)
+                ret = plb->load(file, pmo);
             iret |= ret;
             if (ret == 0) {
                 merge_mbbox(bb,plb->bb);
