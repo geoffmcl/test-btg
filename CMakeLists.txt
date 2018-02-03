@@ -81,7 +81,7 @@ if(WIN32 AND MSVC)
     list(APPEND add_LIBS ws2_32 Winmm)
 else()
     # items for unix
-    set(WARNING_FLAGS "${WARNING_FLAGS} -Wno-unused-variable")
+    set(WARNING_FLAGS "${WARNING_FLAGS} -std=c++11 -Wno-unused-variable")
 endif()
 
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} ${MSVC_FLAGS} -D_REENTRANT" )
