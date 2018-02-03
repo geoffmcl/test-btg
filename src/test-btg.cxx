@@ -471,7 +471,8 @@ int test_btg(SGPath file, PMOPTS po)
     else {
         SPRTF("%s: BTG Magic NOT 'SG', got %x... Aborting...\n", module, header);
         iret = 2;
-        goto Exit;
+        gzclose(fp);
+        return iret;
     }
     sgReadUInt(fp, &btgh.Creation);
 
@@ -493,7 +494,7 @@ int test_btg(SGPath file, PMOPTS po)
     time_t epsecs = btgh.Creation;
     /* Convert to local time format. */
     char tb[256];
-    char *ptime = (char *)"Not available";
+    const char *ptime = "Not available";
     char *stime = ctime(&epsecs);
     if (stime) {
         char *tmp = tb;
@@ -513,10 +514,9 @@ int test_btg(SGPath file, PMOPTS po)
         SPRTF("%s: BTG Read Error... Aborting...\n", module );
     }
 
-Exit:
     // clean up...
     gzclose(fp);
-    return 0;   // looks like a BTG file
+    return iret;   // looks like a BTG file
 }
 
 // for ZLIB DLL load - now using static library if found
