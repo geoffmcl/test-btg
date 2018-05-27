@@ -168,6 +168,19 @@ if (UNIX)
     list(APPEND add_LIBS ${CMAKE_THREAD_LIBS_INIT})
 endif ()
 
+#  SHP2_INCLUDE_DIR, where to find shapefil.h, etc.
+#  SHP2_LIBRARIES, libraries to link against to use SHP.
+#  SHP2_FOUND, If false, do not try to use SHP.
+find_package( SHP2 )
+if (SHP2_FOUND)
+    message(STATUS "Found SHP shapefil lib: ${SHP2_LIBRARIES}, inc ${SHP2_INCLUDE_DIR}" )
+    list(APPEND add_LIBS ${SHP2_LIBRARIES})
+    include_directories( ${SHP2_INCLUDE_DIR} )
+    add_definitions( -DHAVE_SHAPEFILE_H )
+else ()
+    message(STATUS "Note: SHP shpfile NOT FOUND" )
+endif ()    
+    
 #####################################################################
 ## configuration
 check_include_file(dirent.h HAVE_DIRENT_H)
