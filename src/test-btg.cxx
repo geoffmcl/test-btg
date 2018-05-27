@@ -54,6 +54,8 @@ static vSTGS vInputs;
           //  case 's':
 static const char *shp_file = 0;
 #endif // #ifdef HAVE_SHAPEFILE_H
+//  case 'c':
+static const char *csv_file = 0;
 
 
 void show_version()
@@ -75,6 +77,9 @@ void give_help( char *name )
         (xg_file && (options & opt_add_xg_text)) ? "On" : "Off" );
     SPRTF(" --bbox        (-b) = Add green bounding box to above xg file. (def=%s)\n",
         add_tri_bbox ? "Yes" : "No");
+    // case 'c'
+    SPRTF(" --csv <file>  (-c) = Write csv output. (def=%s)\n", csv_file ? csv_file : "Off");
+
 #ifdef HAVE_SHAPEFILE_H
     //  case 's':
     SPRTF(" --shp <file>  (-s) = Write shapefile output. (def=%s)\n", shp_file ? shp_file : "Off");
@@ -363,6 +368,22 @@ int parse_args( int argc, char **argv )
                     return 1;
                 }
                 break;
+            case 'c':
+                if (i2 < argc) {
+                    i++;
+                    sarg = argv[i];
+                    csv_file = strdup(sarg);
+                    options |= opt_add_csv_text;
+                    if (VERB2(verbosity)) {
+                        SPRTF("%s: Added csv text opt to '%s'.\n", module, csv_file);
+                    }
+                }
+                else {
+                    SPRTF("%s: Error: Expected file name to follow %s! Aborting...", module,
+                        arg);
+                    return 1;
+                }
+                break;
             case 'b':
                 add_tri_bbox = true;
                 break;
@@ -553,6 +574,53 @@ int test_btg(SGPath file, PMOPTS po)
     return iret;   // looks like a BTG file
 }
 
+#define ISHASH(a) (a == '#')
+#define ISDOT(a) (a == '.')
+#define ISMP(a) (a == '-') || (a == '+')
+#define ISALPHNUM(a) ((a >= 'A') && (a <= 'Z')) || ((a >= 'a') && (a <= 'z')) || ((a >= '0') && (a <= '9'))
+#define ISOK(a) ISALPHNUM(a) || ISDOT(a) || ISMP(a) || ISHASH(a)
+
+static std::string get_csv_text(std::string &rcsv)
+{
+    std::string s;
+    size_t ii, len = rcsv.size();
+    int insp = 0;
+    int disc = 0;
+    char c;
+    for (ii = 0; ii < len; ii++) {
+        c = rcsv[ii];   // get char
+        if (c == ';')
+            continue;
+        if (c < ' ') {
+            s += c;
+            insp = 0;
+            continue;
+        }
+
+        if (ISOK(c)) {
+            s += c;
+            insp = 0;
+        }
+        else if (c == ' ') {
+            if (insp) {
+                // skipped
+            }
+            else {
+                insp = 1;
+                s += ',';
+            }
+        }
+        else {
+            disc++;
+        }
+
+    }
+    if (s.size()) {
+        s.insert(0,"longitude,latitude,altitude,color\n");
+    }
+    return s;
+}
+
 // for ZLIB DLL load - now using static library if found
 // PATH=X:\3rdParty.x64\bin;%PATH%
 // samples: X:/fgdata/Scenery/Terrain/w130n30/w122n37/KSCK.btg.gz - points and tris
@@ -577,7 +645,8 @@ int main( int argc, char **argv )
     PMOPTS pmo = new MOPTS;
     pmo->options = options;
     pmo->verb = verbosity;
-    std::string xg;
+    std::string g_xg;
+    std::string g_csv;
     init_mbbox(bb);
     init_mbbox(tri_bb);
     max = vInputs.size();
@@ -605,7 +674,8 @@ int main( int argc, char **argv )
                 pls->add_mats(mats);
             }
         }
-        xg += pmo->xg;
+        g_xg += pmo->xg;
+        g_csv += pmo->csv;  // get the csv text from this file input;
     }
     ii = pmo->done.size();
     SPRTF("%s: Done %u of %u inputs, BBox %s, in %s secs\n", module, (int)ii, (int)max,
@@ -622,7 +692,7 @@ int main( int argc, char **argv )
         }
     }
     ///////////////////////////////////////////////////////////////////////////
-    if (xg_file && (options & opt_add_xg_text) && xg.size()) {
+    if (xg_file && (options & opt_add_xg_text) && g_xg.size()) {
         FILE *fp = fopen(xg_file,"w");
         if (fp) {
             size_t res = 1;
@@ -636,7 +706,7 @@ int main( int argc, char **argv )
                 }
             }
             if (res == 1)
-                res = fwrite( xg.c_str(), xg.size(), 1, fp );
+                res = fwrite( g_xg.c_str(), g_xg.size(), 1, fp );
             fclose(fp);
             if (res != 1) {
                 SPRTF("%s: Failed to write xg to '%s'!\n", module, xg_file );
@@ -647,6 +717,34 @@ int main( int argc, char **argv )
             SPRTF("%s: Failed to open xg to '%s'!\n", module, xg_file );
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    if (csv_file && (options & opt_add_csv_text) && g_csv.size()) {
+        // must convert the raw, into the desired CSV form
+        std::string out_csv = get_csv_text(g_csv);
+        if (out_csv.size()) {
+            FILE *fp = fopen(csv_file, "w");
+            if (fp) {
+                size_t res = 1;
+                if (res == 1)
+                    res = fwrite(out_csv.c_str(), out_csv.size(), 1, fp);
+                fclose(fp);
+                if (res != 1) {
+                    SPRTF("%s: Failed to write csv to '%s'!\n", module, csv_file);
+                }
+                else {
+                    SPRTF("%s: Written csv file '%s'\n", module, csv_file);
+                }
+            }
+            else {
+                SPRTF("%s: Failed to open csv out to '%s'!\n", module, csv_file);
+            }
+        }
+        else {
+            SPRTF("%s: No csv text to write to '%s'!\n", module, csv_file);
+        }
+    }
+
 #ifdef HAVE_SHAPEFILE_H
     //  case 's':
     if (shp_file) {

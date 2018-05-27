@@ -231,11 +231,16 @@ int load_btg::load( SGPath file, PMOPTS po )
                     if (VERB9(verb)) {
                         SPRTF("%s",cp);
                     }
+
                     if (collect_xg) {
                         po->xg += cp;
                         if (j == 0)
                             first = cp; // keep first point to close polygon (tringles here)
                     }
+
+                    // add k terrain/airport tris to csv text
+                    if (options & opt_add_csv_text)
+                        po->csv += cp;
 
                     set_mbbox(tri_bb,lat,lon,elev);
                 } else {
@@ -339,6 +344,9 @@ int load_btg::load( SGPath file, PMOPTS po )
                         po->xg += cp;
                         first = cp;
                     }
+                    // 1 add terrain/airport tris to csv text
+                    if (options & opt_add_csv_text)
+                        po->csv += cp;
 
                     nd = wgs84_nodes[u1];
                     node = (nd + gbs_p);
@@ -354,6 +362,10 @@ int load_btg::load( SGPath file, PMOPTS po )
                     if (collect_xg) {
                         po->xg += cp;
                     }
+                    // 2 add terrain/airport tris to csv text
+                    if (options & opt_add_csv_text)
+                        po->csv += cp;
+
                     nd = wgs84_nodes[u2];
                     node = (nd + gbs_p);
                     geod = SGGeod::fromCart(node);
@@ -370,6 +382,9 @@ int load_btg::load( SGPath file, PMOPTS po )
                         po->xg += first;
                         po->xg += "NEXT\n";
                     }
+                    // 3 add terrain/airport tris to csv text
+                    if (options & opt_add_csv_text)
+                        po->csv += cp;
                 }
                 else {
                     SPRTF("; %s: Trouble: Index %u out of range %u\n", module,
