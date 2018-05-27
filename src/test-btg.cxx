@@ -50,6 +50,12 @@ static const char *app_date = TEST_BTG_DATE;
 
 static vSTGS vInputs;
 
+#ifdef HAVE_SHAPEFILE_H
+          //  case 's':
+static const char *shp_file = 0;
+#endif // #ifdef HAVE_SHAPEFILE_H
+
+
 void show_version()
 {
     SPRTF("%s: Date %s, Version %s\n", module, app_date, app_version);
@@ -69,6 +75,10 @@ void give_help( char *name )
         (xg_file && (options & opt_add_xg_text)) ? "On" : "Off" );
     SPRTF(" --bbox        (-b) = Add green bounding box to above xg file. (def=%s)\n",
         add_tri_bbox ? "Yes" : "No");
+#ifdef HAVE_SHAPEFILE_H
+    //  case 's':
+    SPRTF(" --shp <file>  (-s) = Write shapefile output. (def=%s)\n", shp_file ? shp_file : "Off");
+#endif // #ifdef HAVE_SHAPEFILE_H
     SPRTF("\n");
     SPRTF(" --out <html>  (-o) = Output palette html file, and exit. Only for debug.\n");
     SPRTF("\n");
@@ -315,6 +325,29 @@ int parse_args( int argc, char **argv )
             case 'r':
                 recursive = true;
                 break;
+#ifdef HAVE_SHAPEFILE_H
+            case 's':
+                if (i2 < argc) {
+                    i++;
+                    sarg = argv[i];
+                    if (shp_file) {
+                        SPRTF("%s: Error: Already have shp file '%s'! What is this %s.\n", module, shp_file, sarg);
+                        return 1;
+
+                    }
+                    shp_file = strdup(sarg);
+                    if (VERB2(verbosity)) {
+                        SPRTF("%s: Added shp file output '%s'.\n", module, shp_file);
+                    }
+                }
+                else {
+                    SPRTF("%s: Error: Expected file name to follow %s! Aborting...", module,
+                        arg);
+                    return 1;
+                }
+                break;
+
+#endif
             case 'x':
                 if (i2 < argc) {
                     i++;
@@ -327,6 +360,7 @@ int parse_args( int argc, char **argv )
                 } else {
                     SPRTF("%s: Error: Expected file name to follow %s! Aborting...", module,
                         arg );
+                    return 1;
                 }
                 break;
             case 'b':
@@ -613,6 +647,13 @@ int main( int argc, char **argv )
             SPRTF("%s: Failed to open xg to '%s'!\n", module, xg_file );
         }
     }
+#ifdef HAVE_SHAPEFILE_H
+    //  case 's':
+    if (shp_file) {
+        SPRTF("%s:TODO: Add shape file ouput to %s...\n", module, shp_file);
+    }
+#endif // #ifdef HAVE_SHAPEFILE_H
+
     delete pls;
     delete plb;
     delete pmo;
