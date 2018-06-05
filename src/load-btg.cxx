@@ -239,8 +239,17 @@ int load_btg::load( SGPath file, PMOPTS po )
                     }
 
                     // add k terrain/airport tris to csv text
-                    if (options & opt_add_csv_text)
-                        po->csv += cp;
+                    if (options & opt_add_csv_text) {
+                        if (k == 3) {
+                            po->csv += cp;
+                        }
+                        else {
+                            static int dn_warn = 0;
+                            if (!dn_warn)
+                                SPRTF("; %s: Trouble: tri not set of 3 = %u\n", module, (int)k);
+                            dn_warn++;
+                        }
+                    }
 
                     set_mbbox(tri_bb,lat,lon,elev);
                 } else {
