@@ -379,8 +379,10 @@ MATMAP sMatMap[] = {
     { "lf_checkerboard_white", "white", 180, 0 },
     { "lf_sng_broken_yellow_border", "yellow", 181, 0 },
     { "lf_sng_lane_queue", "runway", 182, 0 },
-    // LAST ENTRY IN TABLE
-    { 0, 0 }
+    { "pc_0l",           "runway",  183, 0 },
+    { "pc_6r",           "runway",  184, 0 },
+    /* LAST ENTRY IN TABLE */
+    { 0, 0, 0, 0 }
 };
 
 static vSTGS vMissed;
