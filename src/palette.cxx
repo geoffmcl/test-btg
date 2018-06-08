@@ -385,6 +385,7 @@ MATMAP sMatMap[] = {
     { "MixedCropPastureCover", "brown", 186, 0 },
     { "DeciduousBroadCover", "green", 187, 0 },
     { "pc_3r",           "runway",  188, 0 },
+    { "pa_5c",            "runway", 189, 0 },
         /* LAST ENTRY IN TABLE */
     { 0, 0, 0, 0 }
 };
