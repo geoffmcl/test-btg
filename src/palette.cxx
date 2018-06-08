@@ -381,7 +381,11 @@ MATMAP sMatMap[] = {
     { "lf_sng_lane_queue", "runway", 182, 0 },
     { "pc_0l",           "runway",  183, 0 },
     { "pc_6r",           "runway",  184, 0 },
-    /* LAST ENTRY IN TABLE */
+    { "DryCropPastureCover", "brown", 185, 0 },
+    { "MixedCropPastureCover", "brown", 186, 0 },
+    { "DeciduousBroadCover", "green", 187, 0 },
+    { "pc_3r",           "runway",  188, 0 },
+        /* LAST ENTRY IN TABLE */
     { 0, 0, 0, 0 }
 };
 
