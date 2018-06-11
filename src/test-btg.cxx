@@ -755,7 +755,7 @@ int main( int argc, char **argv )
     delete pls;
     delete plb;
     delete pmo;
-    if (VERB5(verbosity)) {
+    if (VERB1(verbosity)) {
         outout_mat_color_counts();
     }
     close_palette();
