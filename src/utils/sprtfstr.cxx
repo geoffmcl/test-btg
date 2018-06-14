@@ -15,7 +15,7 @@ static const char *module = "sprtfstr";
 
 #define CHKBUF(a,b) { \
     if (!a) {       \
-        fprintf(stderr,"Memory FAILED on %ld byte\n!", b); \
+        fprintf(stderr,"%s:ERROR: Memory FAILED on %d bytes!\n!", module, (int)b); \
         exit(1); \
     } \
 }
