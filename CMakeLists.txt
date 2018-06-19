@@ -180,6 +180,49 @@ if (SHP2_FOUND)
 else ()
     message(STATUS "Note: SHP shpfile NOT FOUND" )
 endif ()    
+
+set (CGAL_MINIMUM 4.0)
+set (CGAL_OLD 0)
+find_package(CGAL COMPONENTS Core REQUIRED)
+if (CGAL_FOUND)
+  if(${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION} VERSION_LESS ${CGAL_MINIMUM})
+        message(FATAL_ERROR "CGAL >= ${CGAL_MINIMUM} is required. Found CGAL ${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION}")
+  else(${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION} VERSION_LESS ${CGAL_MINIMUM})
+        message(STATUS "Found CGAL ${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION}")
+	if(${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION} VERSION_LESS 4.5)
+		set (CGAL_OLD 1)
+	endif()
+  endif(${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION} VERSION_LESS ${CGAL_MINIMUM})
+endif (CGAL_FOUND)
+
+if (CGAL_USE_FILE)
+include ( ${CGAL_USE_FILE} )
+endif ()
+
+#     GDAL_FOUND - True if libgdal is found
+#     GDAL_LIBRARY - A variable pointing to the GDAL library
+#     GDAL_INCLUDE_DIR - Where to find the headers
+# Name: ${_gdal_lib} HINTS ENV GDAL_DIR ENV GDAL_ROOT ${_gdal_libpath}
+find_package(GDAL 2.0.0)
+if (GDAL_FOUND)
+    message(STATUS "Found GDAL - inc ${GDAL_INCLUDE_DIR}, lib ${GDAL_LIBRARY}")
+    if (CGAL_USE_FILE)
+        message(STATUS "Have CGAL_USE_FILE=${CGAL_USE_FILE}" )
+    endif ()
+    list(APPEND add_LIBS ${GDAL_LIBRARY})
+    include_directories( ${GDAL_INCLUDE_DIR} )
+    add_definitions( -DHAVE_GDAL_H )
+    include_directories( src/Lib )  # access to libs
+    add_subdirectory(src/Lib/poly2tri)
+    add_subdirectory(src/Lib/Output)
+    add_subdirectory(src/Lib/TriangleJRS)
+    add_subdirectory(src/Lib/Polygon)
+    add_subdirectory(src/Lib/Geometry)
+    add_subdirectory(src/Lib/vpf)   # VMAP0 lib and tools to explore
+    add_subdirectory(src/Prep/TGVPF) # enable extraction tool
+else ()
+    message(WARNING "NOT Found GDAL - HINTS ENV $ENV{GDAL_DIR}, ENV $ENV{GDAL_ROOT}")
+endif ()
     
 #####################################################################
 ## configuration
@@ -254,5 +297,8 @@ if (MSVC)
 endif ()
 # deal with install, if any...
 install( TARGETS ${name} DESTINATION bin )
+
+# compile the PUBLIC DOMAIN vpf extractor
+add_subdirectory(src/vpf)
 
 # eof

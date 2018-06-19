@@ -16,3 +16,4 @@ ipch/*
 *.suo
 *.VC.db
 zconf.h
+src/*

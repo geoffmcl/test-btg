@@ -61,10 +61,58 @@
 @REM call setupqt64
 @cd %BLDDIR%
 
-:DNARCH
+@REM :DNARCH
+@REM ##############################################
+@REM A 64-bit build of simgear
+@set INSTALL_DIR=%TMPDRV%\install\msvc140-64\%TMPPRJ%-fork
+@REM set INSTALL_DIR=%TMPDRV%\install\msvc140-64\%TMPPRJ%
+@REM set SIMGEAR_DIR=%TMPDRV%\install\msvc140-64\SimGear
+@REM SIMGEAR_DIR=%TMPDRV%\install\msvc140-64\SimGear-fork
+@set SIMGEAR_DIR=%TMPSG%
+@set OSG_DIR=%TMPDRV%\install\msvc140-64\OpenSceneGraph
+@set BOOST_ROOT=%TMPBOOST%
+@REM set BOOST_ROOT=%TMPDRV%\boost_1_60_0
+@set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib64-msvc-14.0
+@set ZLIBDIR=%TMP3RD%
+@set GDAL_INSTALL=Z:\software.x64
+@if NOT EXIST %GDAL_INSTALL%\nul goto NOGDAL
+@if NOT EXIST %GDAL_INSTALL%\include\gdal.h goto NOGDAL2
+@set CGAL_INSTALL=F:\Projects\install\msvc140-64\CGAL
+@if NOT EXIST %CGAL_INSTALL%\nul goto NOCGAL
 
-@set TMPOPTS=%TMPOPTS% -DCMAKE_INSTALL_PREFIX=%TMPINST%
-@set TMPOPTS=%TMPOPTS% -DCMAKE_PREFIX_PATH=%TMPSG%;%TMPBOOST%
+@REM if NOT EXIST %SIMGEAR_DIR%\nul goto NOSGD
+@if NOT EXIST %ZLIBDIR%\nul goto NOZLD
+@if NOT EXIST %BOOST_ROOT%\nul goto NOBOOST
+@if NOT EXIST %BOOST_LIBRARYDIR%\nul goto NOBOOST2
+
+@REM set PostgreSQL_ROOT=C:\Program Files (x86)\PostgreSQL\9.1
+
+@set LIB=%BOOST_LIBRARYDIR%;%LIB%
+
+@REM if NOT EXIST %SIMGEAR_DIR%\nul goto NOSGD
+@REM if "%Qt5_DIR%x" == "x" NOQTD
+@rem if NOT EXIST %Qt5_DIR%\nul goto NOQTD
+@REM if NOT EXIST %ZLIBDIR%\nul goto NOZLD
+
+@echo Set SIMGEAR_DIR=%SIMGEAR_DIR%
+@REM echo Set QT5_DIR=%Qt5_DIR%
+@echo Set ZLIBDIR=%ZLIBDIR%
+@echo Set OSG_DIR=%OSG_DIR%
+@echo Set BOOST_ROOT=%BOOST_ROOT%
+@echo Set BOOST_LIBRARYDIR=%BOOST_LIBRARYDIR%
+
+@set CMOPTS=%TMPOPTS%
+@set CMOPTS=%CMOPTS% -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR%
+@set CMOPTS=%CMOPTS% -DCMAKE_PREFIX_PATH:PATH=%GDAL_INSTALL%;%ZLIBDIR%;%OSG_DIR%;%SIMGEAR_DIR%;%CGAL_INSTALL%
+@REM set CMOPTS=%CMOPTS% -DCMAKE_PREFIX_PATH:PATH=%ZLIBDIR%;%OSG_DIR%;%SIMGEAR_DIR%
+@set CMOPTS=%CMOPTS% -DZLIB_ROOT=%ZLIBDIR%
+@set CMOPTS=%CMOPTS% -DMSVC_3RDPARTY_ROOT=%TMP3RD%
+@set CMOPTS=%CMOPTS% -DBOOST_ROOT=%BOOST_ROOT%
+@REM set CMOPTS=%CMOPTS% -DBoost_ADDITIONAL_VERSIONS="1.62.0"
+@set TMPOPTS=%CMOPTS%
+@REM ##############################################
+@REM set TMPOPTS=%TMPOPTS% -DCMAKE_INSTALL_PREFIX=%TMPINST%
+@REM set TMPOPTS=%TMPOPTS% -DCMAKE_PREFIX_PATH=%TMPSG%;%TMPBOOST%
 @REM set TMPOPTS=%TMPOPTS% -DCMAKE_PREFIX_PATH:PATH=%TMP3RD%;%TMPOSG%
 @REM set TMPOPTS=%TMPOPTS% -DENABLE_TESTS:BOOL=OFF
 
@@ -192,14 +240,36 @@
 @echo Error: Unable to locate %TMP3RD%! *** FIX ME *** >> %TMPLOG%
 @goto ISERR
 
-:NOOSG
+@REM :NOOSG
 @echo Error: Unable to locate %TMPOSG%! *** FIX ME ***
 @echo Error: Unable to locate %TMPOSG%! *** FIX ME *** >> %TMPLOG%
 @goto ISERR
 
+:NOZLD
+@echo Note: ZLIB direcotry %ZLIBDIR% does NOT EXIST! *** FIX ME ***
+@goto ISERR
+
 :NOBOOST
+@REM :NOBOOST
 @echo Error: Unable to locate boost %TMPBOOST%! *** FIX ME ***
 @echo Error: Unable to locate boost %TMPBOOST%! *** FIX ME *** >> %TMPLOG%
+@echo Note: Boost dir %BOOST_ROOT% does not exist! *** FIX ME ***  
+@goto ISERR
+
+:NOBOOST2
+@echo Note: Boost dir %BOOST_LIBRARYDIR% does not exist! *** FIX ME ***  
+@goto ISERR
+
+:NOCGAL
+@echo Note: CGAL dir %CGAL_INSTALL% does not exist! *** FIX ME ***
+@goto ISERR 
+
+:NOGDAL
+@echo Note: GDAL install dir does NOT EXIST %GDAL_INSTALL%! *** FIX ME *** 
+@goto ISERR
+
+:NOGDAL2
+@echo Note: GDAL header does NOT EXIST %GDAL_INSTALL%\include\gdal.h! *** FIX ME *** 
 @goto ISERR
 
 :ISERR
