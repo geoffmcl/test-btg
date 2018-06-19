@@ -897,7 +897,6 @@ TGPolygon tgPolygonSimplify(const TGPolygon &poly)
     return result;
 }
 
-#ifndef _MSC_VER
 // Send a polygon to standard output.
 std::ostream &
 operator<< (std::ostream &output, const TGPolygon &poly)
@@ -927,5 +926,5 @@ operator<< (std::ostream &output, const TGPolygon &poly)
     return output;  // MSVC
 }
 
-#endif // #ifndef _MSC_VER
+/* eof */
 
