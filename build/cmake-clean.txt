@@ -3,4 +3,6 @@ libutils.a
 test-btg
 libzlibstatic.a
 zconf.h
+install_manifest.txt
+src
 
