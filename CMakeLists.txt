@@ -81,13 +81,21 @@ if(WIN32 AND MSVC)
     list(APPEND add_LIBS ws2_32 Winmm)
 else()
     # items for unix
-    set(WARNING_FLAGS "${WARNING_FLAGS} -std=c++11 -Wno-unused-variable")
+    set(WARNING_FLAGS "${WARNING_FLAGS} -Wno-unused-variable")
+    set(CXX_FLAGS "${CXX_FLAGS} -std=c++11")
 endif()
 
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} ${MSVC_FLAGS} -D_REENTRANT" )
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} ${MSVC_FLAGS} -D_REENTRANT" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS} ${WARNING_FLAGS} ${MSVC_FLAGS} -D_REENTRANT" )
 set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MSVC_LD_FLAGS}" )
 
+check_include_file( sys/time.h HAVE_SYS_TIME_H )
+if (HAVE_SYS_TIME_H)
+    add_definitions( -DHAVE_SYS_TIME_H )
+    message(STATUS "Found sys/time.h and set HAVE_SYS_TIME_H")
+else ()
+    message(STATUS "Not found sys/time.h...")
+endif ()
 # Setup MSVC 3rd party directories
 # is this required??? include( ConfigureMsvc3rdParty )
 
