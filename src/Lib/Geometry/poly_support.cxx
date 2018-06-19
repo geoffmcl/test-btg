@@ -54,6 +54,9 @@ using std::ostream_iterator;
 using std::sort;
 using std::string;
 using std::vector;
+#ifndef WIN32
+using std::isnan;
+#endif
 
 #if 0 // unused
 // Given a line segment specified by two endpoints p1 and p2, return
