@@ -899,8 +899,8 @@ TGPolygon tgPolygonSimplify(const TGPolygon &poly)
 
 #ifndef _MSC_VER
 // Send a polygon to standard output.
-ostream &
-operator<< (ostream &output, const TGPolygon &poly)
+std::ostream &
+operator<< (std::ostream &output, const TGPolygon &poly)
 {
     char buff[128];
     int nContours = poly.contours();
