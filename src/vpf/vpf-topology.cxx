@@ -1,5 +1,12 @@
-// vpf-topology.cxx - program to dump a topology to output.
-// This file is released into the Public Domain, and comes with NO WARRANTY!
+/* 
+    vpf-topology.cxx - program to dump VMAP0 topology to output.
+    This file is released into the Public Domain, and comes with NO WARRANTY!
+    Here enhanced to output 'lon lat' points
+
+    Uses vpf library
+
+    20180621 - Show point count output
+ */
 
 #include <iostream>
 using std::cout;
@@ -21,6 +28,7 @@ static bool add_index = false;
 static size_t next_index = 0;
 static int next_color = 0;
 static VpfRectangle ubounds;
+static int point_cnt = 0;
 
 static int check_me()
 {
@@ -57,6 +65,7 @@ dump_point (const VpfPoint &p)
 {
     cout.precision(15);
     cout << p.x << ' ' << p.y;
+    point_cnt++;
     if (add_index) {
         cout << " # " << next_index;
         next_index++;
@@ -410,7 +419,7 @@ int main (int ac, char ** av)
 
     cerr << "# Bounds: " << ubounds << endl;
     if (nTopologies)
-        cerr << "# Scanned " << nTopologies << " topologies..." << endl;
+        cerr << "# Scanned " << nTopologies << " topologies, out " << point_cnt << " points" << endl;
     if (gen_color) {
         cerr << "# last color " << next_color << endl;
     }
