@@ -27,6 +27,8 @@
 :NOFC4
 @echo Can NOT run fc4! so doing copy...
 :DOCOPY
+@echo Will do 'copy %TMPSRC% %TMPDST%'
+@pause
 copy %TMPSRC% %TMPDST%
 @if NOT EXIST %TMPDST% goto ERR3
 @call dirmin %TMPDST%
