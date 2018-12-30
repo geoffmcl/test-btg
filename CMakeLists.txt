@@ -276,6 +276,23 @@ add_library( ${name} ${${name}_SRCS} ${${name}_HDRS} )
 list(APPEND add_LIBS ${name})
 
 #################################################
+# other libs ...
+set(name test-btg-lib)
+set(dir src)
+set(${name}_SRCS
+    ${dir}/load-btg.cxx
+    ${dir}/load-stg.cxx
+    ${dir}/palette.cxx
+    )
+set(${name}_HDRS
+    ${dir}/load-btg.hxx
+    ${dir}/load-stg.hxx
+    ${dir}/palette.hxx
+    )
+add_library( ${name} ${${name}_SRCS} ${${name}_HDRS} )
+list(APPEND add_LIBS ${name} )
+
+#################################################
 ##### EXECUTABLE #####
 #################################################
 
@@ -285,17 +302,28 @@ set(name test-btg)
 set(dir src)
 set(${name}_SRCS
     ${dir}/test-btg.cxx
-    ${dir}/load-btg.cxx
-    ${dir}/load-stg.cxx
-    ${dir}/palette.cxx
     )
 set(${name}_HDRS
     ${dir}/test-btg.hxx
-    ${dir}/load-btg.hxx
-    ${dir}/load-stg.hxx
-    ${dir}/palette.hxx
     )
 add_executable( ${name} ${${name}_SRCS} ${${name}_HDRS} )
+if (add_LIBS)
+    message(STATUS "*** target_link_libraries( ${name} ${add_LIBS} )")
+    target_link_libraries( ${name} ${add_LIBS} )
+endif ()
+if (MSVC)
+    set_target_properties( ${name} PROPERTIES DEBUG_POSTFIX d )
+endif ()
+# deal with install, if any...
+install( TARGETS ${name} DESTINATION bin )
+
+# get elevations from btg file
+set(name btg-elev)
+set(dir src)
+set(${name}_SRCS
+    ${dir}/${name}.cxx
+    )
+add_executable( ${name} ${${name}_SRCS} )
 if (add_LIBS)
     message(STATUS "*** target_link_libraries( ${name} ${add_LIBS} )")
     target_link_libraries( ${name} ${add_LIBS} )
