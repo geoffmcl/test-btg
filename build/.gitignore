@@ -7,4 +7,6 @@ libutils.a
 test-btg
 install_manifest.txt
 src/*
+libtest-btg-lib.a
+btg-elev
 

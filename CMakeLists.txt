@@ -289,8 +289,10 @@ set(${name}_HDRS
     ${dir}/load-stg.hxx
     ${dir}/palette.hxx
     )
+if (WIN32)
 add_library( ${name} ${${name}_SRCS} ${${name}_HDRS} )
 list(APPEND add_LIBS ${name} )
+endif ()
 
 #################################################
 ##### EXECUTABLE #####
@@ -300,12 +302,27 @@ list(APPEND add_LIBS ${name} )
 # have 1 C/C++ sources, 1 headers
 set(name test-btg)
 set(dir src)
+if (WIN32)
 set(${name}_SRCS
     ${dir}/test-btg.cxx
     )
 set(${name}_HDRS
     ${dir}/test-btg.hxx
     )
+else ()
+set(${name}_SRCS
+    ${dir}/test-btg.cxx
+    ${dir}/load-btg.cxx
+    ${dir}/load-stg.cxx
+    ${dir}/palette.cxx
+    )
+set(${name}_HDRS
+    ${dir}/load-btg.hxx
+    ${dir}/load-stg.hxx
+    ${dir}/palette.hxx
+    ${dir}/test-btg.hxx
+    )
+endif ()    
 add_executable( ${name} ${${name}_SRCS} ${${name}_HDRS} )
 if (add_LIBS)
     message(STATUS "*** target_link_libraries( ${name} ${add_LIBS} )")
@@ -323,6 +340,9 @@ set(dir src)
 set(${name}_SRCS
     ${dir}/${name}.cxx
     )
+if (UNIX)
+    list(APPEND ${name}_SRCS ${test-btg-lib_SRCS} ${test-btg-lib_HDRS})
+endif ()
 add_executable( ${name} ${${name}_SRCS} )
 if (add_LIBS)
     message(STATUS "*** target_link_libraries( ${name} ${add_LIBS} )")

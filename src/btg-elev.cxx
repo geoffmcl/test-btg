@@ -39,7 +39,14 @@ static double usr_lat = 27.988; // -400;
 static double usr_lon = 86.9253; // -400;
 static double usr_alt = 0.0; //  8848.0; // 0
 
-static const char *fg_scenery = "G:\\S";
+#ifndef DEF_SCENERY
+#ifdef WIN32
+#define DEF_SCENERY "G:\\S"
+#else
+#define DEF_SCENERY "/media/geoff/backup/next/scenery2"
+#endif
+#endif // DEF_SCENERY
+static const char *fg_scenery = DEF_SCENERY;
 
 static const char *def_log = "tempbtge.txt";
 
