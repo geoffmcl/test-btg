@@ -78,7 +78,7 @@ if(WIN32 AND MSVC)
     #set( NOMINMAX 1 )
     # to distinguish between debug and release libs
     set( CMAKE_DEBUG_POSTFIX "d" )
-    list(APPEND add_LIBS ws2_32 Winmm)
+    list(APPEND add_LIBS ws2_32 Winmm Shlwapi)
 else()
     # items for unix
     set(WARNING_FLAGS "${WARNING_FLAGS} -Wno-unused-variable")
@@ -348,6 +348,19 @@ if (add_LIBS)
     message(STATUS "*** target_link_libraries( ${name} ${add_LIBS} )")
     target_link_libraries( ${name} ${add_LIBS} )
 endif ()
+if (MSVC)
+    set_target_properties( ${name} PROPERTIES DEBUG_POSTFIX d )
+endif ()
+# deal with install, if any...
+install( TARGETS ${name} DESTINATION bin )
+
+set(name test_binobj)
+set(dir src)
+set(${name}_SRCS
+    ${dir}/${name}.cxx
+    )
+add_executable( ${name} ${${name}_SRCS} )
+target_link_libraries( ${name} ${add_LIBS} )
 if (MSVC)
     set_target_properties( ${name} PROPERTIES DEBUG_POSTFIX d )
 endif ()
