@@ -101,6 +101,22 @@ if (HAVE_SYS_TIME_H)
 else ()
     message(STATUS "Not found sys/time.h...")
 endif ()
+#################################################
+#   LibArchive_FOUND        - true if libarchive was found
+#   LibArchive_INCLUDE_DIRS - include search path
+#   LibArchive_LIBRARIES    - libraries to link
+#   LibArchive_VERSION      - libarchive 3-component version number
+find_package( LibArchive )
+if (LibArchive_FOUND)
+    message(STATUS "*** Found 'LibArchive' vers ${LibArchive_VERSION}")
+    message(STATUS "*** inc = ${LibArchive_INCLUDE_DIRS}, libs = ${LibArchive_LIBRARIES}")
+    include_directories( ${LibArchive_INCLUDE_DIRS} )
+    list(APPEND EXTRA_LIBS ${LibArchive_LIBRARIES})
+else ()
+    add_definitions( -DNO_LIBARCH )
+    message(STATUS "*** Can NOT locate 'LibArchive'! Set -DNO_LIBARCH - Use alternates... like zlib..." )
+endif ()
+###################################################
 # Setup MSVC 3rd party directories
 # is this required??? include( ConfigureMsvc3rdParty )
 
@@ -236,7 +252,69 @@ if (GDAL_FOUND)
 else ()
     message(WARNING "NOT Found GDAL - HINTS ENV $ENV{GDAL_DIR}, ENV $ENV{GDAL_ROOT}")
 endif ()
-    
+
+#####################################################################
+#################################################
+### very interesting btgchk library of functions
+set(name btgutils)
+set(dir src/chkbtg)
+set(${name}_SRCS
+    ${dir}/airport.c
+    ${dir}/bsphere.c
+    ${dir}/btgio.c
+    ${dir}/check.c
+    ${dir}/color.c
+    ${dir}/coord.c
+    ${dir}/edge.c
+    ${dir}/element.c
+    ${dir}/file.c
+    ${dir}/geometry.c
+    ${dir}/header.c
+    ${dir}/normal.c
+    ${dir}/object.c
+    ${dir}/point.c
+    ${dir}/property.c
+    ${dir}/raw.c
+    ${dir}/seam.c
+    ${dir}/texcoo.c
+    ${dir}/triangle.c
+    ${dir}/vertex.c
+    )
+set(${name}_HDRS
+    ${dir}/airport.h
+    ${dir}/bsphere.h
+    ${dir}/btgio.h
+    ${dir}/check.h
+    ${dir}/color.h
+    ${dir}/coord.h
+    ${dir}/edge.h
+    ${dir}/element.h
+    ${dir}/file.h
+    ${dir}/geometry.h
+    ${dir}/header.h
+    ${dir}/normal.h
+    ${dir}/object.h
+    ${dir}/point.h
+    ${dir}/property.h
+    ${dir}/raw.h
+    ${dir}/seam.h
+    ${dir}/struct.h
+    ${dir}/texcoo.h
+    ${dir}/triangle.h
+    ${dir}/vertex.h
+    )
+if (MSVC)
+list( APPEND ${name}_SRCS ${dir}/win32/getopt.c )
+endif ()
+add_library( ${name} ${${name}_SRCS} ${${name}_HDRS} )
+list(APPEND add_LIBS ${name})
+# deal with install, if any...
+#install( TARGETS ${name}
+#    RUNTIME DESTINATION bin
+#    LIBRARY DESTINATION lib
+#    ARCHIVE DESTINATION lib )
+#install(FILES ${${name}_HDRS} DESTINATION include)
+
 #####################################################################
 ## configuration
 check_include_file(dirent.h HAVE_DIRENT_H)
@@ -374,5 +452,38 @@ install( TARGETS ${name} DESTINATION bin )
 
 # compile the PUBLIC DOMAIN vpf extractor
 add_subdirectory(src/vpf)
+
+##################################################
+set(name btg2dxf)
+set(dir src/chkbtg)
+set(${name}_SRCS
+    ${dir}/${name}.c
+    )
+add_executable( ${name} ${${name}_SRCS} )
+if (add_LIBS OR EXTRA_LIBS)
+    target_link_libraries( ${name} ${add_LIBS} ${EXTRA_LIBS} )
+endif ()
+if (MSVC)
+    set_target_properties( ${name} PROPERTIES DEBUG_POSTFIX d )
+endif ()
+# deal with install, if any...
+#install( TARGETS ${name} DESTINATION bin )
+
+set(name btgchk)
+set(dir src/chkbtg)
+set(${name}_SRCS
+    ${dir}/btgchk.c
+    )
+add_executable( ${name} ${${name}_SRCS} )
+if (add_LIBS OR EXTRA_LIBS)
+    target_link_libraries( ${name} ${add_LIBS} ${EXTRA_LIBS} )
+endif ()
+if (MSVC)
+    set_target_properties( ${name} PROPERTIES DEBUG_POSTFIX d )
+endif ()
+# deal with install, if any...
+#install( TARGETS ${name} DESTINATION bin )
+
+##########################################################
 
 # eof
