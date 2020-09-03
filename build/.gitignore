@@ -6,7 +6,11 @@ cmake_install.cmake
 libutils.a
 test-btg
 install_manifest.txt
-src/*
-libtest-btg-lib.a
-btg-elev
-
+*.vcxproj
+*.filters
+Debug/*
+Release/*
+*.dir/*
+test_btg.sln
+x64/*
+zconf.h
