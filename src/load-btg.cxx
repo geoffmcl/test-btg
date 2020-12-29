@@ -99,7 +99,7 @@ int load_btg::load( SGPath file, PMOPTS po )
     elev = geodCent.getElevationM();
     SPRTF("%s: Center %lf,%lf,%lf (%lf,%lf,%lf)\n", module, lon, lat, elev, gbs_p[0], gbs_p[1], gbs_p[2]);
     if (collect_xg) {
-        cp = stg.printf("; %s: Center %lf,%lf,%lf\n", file.c_str(), lon, lat, elev);
+        cp = stg.printf("# %s: Center %lf,%lf,%lf\n", file.c_str(), lon, lat, elev);
         po->xg += cp;
     }
     set_mbbox(bb,lat,lon,elev);
