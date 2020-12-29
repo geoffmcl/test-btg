@@ -14,3 +14,5 @@ Release/*
 test_btg.sln
 x64/*
 zconf.h
+.vs/*
+*.user
