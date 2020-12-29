@@ -16,3 +16,4 @@ x64/*
 zconf.h
 .vs/*
 *.user
+src/*
