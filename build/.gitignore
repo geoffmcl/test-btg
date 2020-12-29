@@ -17,3 +17,4 @@ zconf.h
 .vs/*
 *.user
 src/*
+test*.bat
